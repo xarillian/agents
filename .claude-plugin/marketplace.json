@@ -1,0 +1,27 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "xarillian-agents",
+  "owner": {
+    "name": "Austin Wayne"
+  },
+  "metadata": {
+    "description": "Personal marketplace for agent harness plugins."
+  },
+  "plugins": [
+    {
+      "name": "review",
+      "description": "Review code with focused, evidence-based subagents.",
+      "source": "./plugins/review",
+      "version": "0.1.0",
+      "author": {
+        "name": "Austin Wayne"
+      },
+      "category": "development",
+      "keywords": [
+        "code-review",
+        "review",
+        "quality"
+      ]
+    }
+  ]
+}
