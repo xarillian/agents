@@ -1,0 +1,7 @@
+{
+  "name": "review",
+  "version": "0.1.0",
+  "description": "Review code with focused, evidence-based subagents.",
+  "private": true,
+  "omp": {}
+}

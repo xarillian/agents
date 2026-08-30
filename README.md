@@ -3,6 +3,12 @@
 Central directory for personal chassis setup.
 
 ## Claude Code
+Claude Code plugins live in the local marketplace:
+
+```sh
+claude plugin marketplace add ~/.agents
+claude plugin install <plugin>@xarillian-agents --scope user --yes
+```
 
 ## Codex
 
@@ -20,3 +26,11 @@ OMP allows injectable prompts, formatted by file name. Stored here in `prompts`.
 ### Rules
 
 Rules in `rules/` with `alwaysApply: true` are always loaded into the system context for _each_ request. OMP omits their automatic injection when the same normalized content already appears in the system prompt, custom prompt, append prompt, or a loaded context file. The rule remains active and available through `rule://<name>` even when its duplicate text is omitted.
+
+### Plugins
+
+OMP links plugins installed from local paths. Use the same idempotent command to install or reinstall one:
+
+```sh
+omp plugin install <path>
+```

@@ -13,6 +13,8 @@
 **Compositor:** Hyprland (Wayland)
 **Display Manager:** SDDM
 
+**Current Keyboard:** Keychron Q1 HE Aluminum 75%
+
 ### CLI Tools
 
 `rg`, `fd`, `bat`, `eza`, `fzf`, `jq`, `git-delta`, `tldr`, `tree`, `less`, `nvtop`, `fnm`, `watchexec`, `entr`, `yq`, `lazygit`, `zoxide`, `gh`, `httpie`, `curlie`, `rsync`
