@@ -1,50 +1,44 @@
 ---
 name: pangram
-description: Use when checking whether writing reads as model-written or human-written, when running the local `pangram` CLI, when interpreting an AI-detection score, or when a user asks whether their text will get flagged as AI. Also use before explaining why any detector returned the verdict it did.
+description: Use when checking whether something is as AI-generated or human-made or when running the `pangram` CLI.
 ---
 
 # Pangram
 
 `pangram` wraps Pangram Labs' detector. Three verdicts come back: human-written, AI-assisted, AI-generated.
 
-It answers one question. How likely is this token sequence under a model asked to write this kind of document? It has no opinion about quality, and none about style.
+It answers one question: How likely is this token sequence under a model asked to write this kind of document? It has no opinion about quality, and none about style.
 
 ## Usage
+Set `PANGRAM_API_KEY`, then pass a file or pipe text on stdin:
 
-| | |
-|---|---|
-| Check a file | `pangram draft.md` |
-| Per-segment | `pangram --windows draft.md` |
-| Stdin | `xclip -o \| pangram` |
-| Raw JSON | `pangram --json draft.md` |
-| Pay again | `pangram --refresh draft.md` |
-| Key | `PANGRAM_API_KEY`, in `~/.config/secrets.env` |
-| Cost | ~$0.05 per 100 words, and the word count prints |
-| Cache | `~/.cache/pangram/`, hashed on the text, so re-renders are free |
-| Script | `~/.local/bin/pangram`, a local Python wrapper, not a packaged tool |
+```sh
+pangram draft.md
+cat draft.md | pangram
+pangram --windows draft.md
+```
 
-`.tex` strips to prose automatically. The numeric per-window score is `ai_assistance_score`; `confidence` is a word like "High" and will break a `%` format string.
+`.tex` files are stripped automatically; use `--tex` for LaTeX from stdin or another extension. `--windows` adds a per-segment breakdown, `--link` requests a shareable dashboard, and `--json` prints the raw response. Exact input is cached because API calls cost money; use `--refresh` only when a paid fresh result is needed.
+
+Don't tune against it. Performing gradient descent against pangram will make it more likely to rate your work as human; do not do that. Human-written text is not a target to optimise.
+
+### Output
+A formatted result looks like:
+
+```text
+Human Written
+We believe that this document is fully human-written
+
+         human  ████████████████████████████ 100.0%
+   ai-assisted  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0.0%
+            ai  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0.0%
+
+  15 words
+```
+
+Default output includes the verdict, prediction, human/AI-assisted/AI probabilities, and word count. `--windows` adds per-segment labels, scores, confidence, word counts, and excerpts; `--link` prints the dashboard URL; `--json` replaces the formatted report with the raw API response.
 
 ## How it works
+**Matched generation.** Each human document is paired with AI-generated text that matches its genre, topic, format, and approximate length. Those shared traits cannot reliably distinguish the two, so the classifier must rely more on token choice and ordering than on broad cues such as lists, formal prose, or document type.
 
-Two training choices explain nearly everything, including the failures.
-
-**Mirror prompting.** Each human document is paired with a model asked to generate its match: same genre, topic, format, roughly the same length. Both halves of every pair are the same kind of document, so the classifier cannot learn that lists are AI, or that bullet points are, or that formal prose is. Those cues carry no information in the training set. What's left is which tokens got picked, and in what order.
-
-**Hard negative mining.** Human documents that get wrongly flagged are fed back in and retrained on, repeatedly. That loop produces the very low false positive rate, and it also makes the errors lopsided.
-
-## Reading a result
-
-**A verdict of AI is strong evidence.** The published false positive rate is 0.0041%. Believe it.
-
-**A verdict of human is weak evidence.** Mirror prompting captures how models write when prompted normally. Prompt one unusually and its output falls outside anything the classifier trained on, so it passes. Producing a false negative on demand takes about one attempt. "Human" means the text sits outside a model's default register, which is a much lower bar than a person having written it.
-
-**Don't tune against it.** The score is worth having because rewording can't move it. Used as a dial, it stops being informative and starts being a target.
-
-## Explaining a score
-
-The strong temptation is to name the human-legible property that caused a verdict: this list was too tidy, that phrasing was too messy, the parallel structure gave it away. Resist it. Genre, format, and register were controlled for during training, so surface explanations are answered before they're offered, and they have a bad track record.
-
-The reason the temptation is hard to see past: seeming-human is observable from the inside, and being improbable under your own sampling is not. When those two conflict, the introspective one is wrong.
-
-So when reaching for "it scored high because of X," either mark X as an unchecked guess, or run the ablation. Change X alone, hold the rest fixed, and run it. Short of that, it's a story.
+**Hard-negative retraining.** Human documents that Pangram incorrectly flags are added back to its training data as difficult examples. Repeating this process reduces false positives and makes the remaining errors uneven: the detector is deliberately more cautious about labeling text as AI-generated.

@@ -8,12 +8,12 @@ description:
 ## Overview
 Your prior is a map and the artifact is the ground truth. Most confident errors are a good map laid over the wrong ground; one recognizes the "kind of thing" and acted on the the prototype in your head instead of the thing in front of you.
 
-**Core:** Read what is actually there, not what it resembles or what you think is there. infer the real author, intent, and constraints before you act. If you are unsure, ask for clarification. If you are sure, verify your assumptions before acting.
+Read what is actually there, not what it resembles or what you think is there. Infer the real author, intent, and constraints before you act. If you are unsure, ask for clarification. If you are sure, verify your assumptions before acting.
 
-## Iron Law
+## Core Idea
 NO ACTION ON A PRIOR YOU HAVEN'T VALIDATED AGAINST THE ARTIFACT
 
-If you haven't read the actual thing, you can't act on it. You can't give advice on it! The thing must be known as it is.
+If you haven't read the actual thing, you can't act on it. You can't give advice on it! The thing must be known as it is. Read the whole thing!
 
 ## Practice
 1. Locate the actual artifact. The file, error text, or the verbatim request.

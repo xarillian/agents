@@ -1,25 +1,39 @@
 ---
 name: papercuts
-description: "Use when a small friction exposes a repeatable problem in the project or tool workflow and recording it could produce a durable improvement. Do not log expected permission boundaries, ordinary sandbox restrictions, or isolated external failures."
+description: >-
+  Interrupt work and use when a friction occurs. If a tool call fails, a command is flaky, or a setup step is confusing, use this skill. Do not use for command failures, bad inputs, typos, or one-off mistakes.
 ---
 
 # Papercuts
+## When to Record
+If you are using this skill, there are two options:
 
-Important! Use this skill when you hit a small friction while working: a tool call that missed and had to be retried, a flaky command, a confusing or undocumented setup step, a flaky cache, a misleading error, a non-obvious gotcha, or a command that succeeded and quietly returned something false. Self-inflicted friction counts only when it exposes a repeatable tool or workflow improvement. A typo, recalled rule, or mistake corrected before impact does not qualify. The goal is to capture these small frictions so they can be fixed and the workflow improved; don't just capture random noise.
+1) Choose to record,
+2) Choose to ignore.
 
+Both are valid options depending on the context.
 
-DO NOT RECORD SECRETS HERE. BE CAREFUL. If you are unsure, do not log it.
+Record when:
+- The friction is repeatable: if the tool, action, workflow will exhibit the same negative behaviour again if repeated, and it is not a one-off mistake or typo.
+- The friction is actionable: there is something that can be done to improve the tool, workflow, or documentation to prevent the friction from happening.
 
-Submit each papercut through `~/.agents/bin/papercuts.sh`. It serializes and atomically appends a uniform, model-readable YAML entry.
+Do not record when:
+- The friction is not actionable or repeatable.
+- The friction is exceedingly minor, such as a typo, recalled rule, or a mistake corrected before impact. These do not qualify as papercuts.
+- The friction contains secrets. BE CAREFUL; DO NOT RECORD SECRETS.
 
-```bash
-~/.agents/bin/papercuts.sh -m <exact-active-model-id> [-p <project>] [-c <suspected-cause>] "<summary>"
+## Workflow
+1. Determine if the friction qualifies as a papercut. If it does, continue with this workflow. If it does not, continue with your work.
+2. Submit the papercut through `~/.agents/bin/papercuts.sh`.
+
+## Example Submission
+```sh
+~/.agents/bin/papercuts.sh -m <active-model-id> [-p <project>] "<summary>"
 ```
 
-- `<exact-active-model-id>` is the concrete current model ID from the environment block, not a role alias such as `@low`.
-- Omit `-p` inside a Git repository to use its name. Supply it only when the source project cannot be derived.
-- `-c` records a likely cause or fix. Omit it when unknown.
-- Never read or write `~/.agents/workflow/PAPERCUTS.yaml` directly. Submit the entry through the command.
+- `<active-model-id>` is the concrete current model ID (that's you). E.g. `claude-sonnet-5`
+- `-p` is optional. If omitted, the script will attempt to infer the project name from the current Git repo.
+- `"summary"` is a _short_ description of the friction. It should be one or two sentences at most.
 
 The command records the runtime timestamp, project, model, and working directory in this fixed shape:
 
