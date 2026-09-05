@@ -28,24 +28,10 @@ Do not record when:
 
 ## Example Submission
 ```sh
-~/.agents/bin/papercuts.sh -m <active-model-id> [-p <project>] "<summary>"
+~/.agents/bin/papercuts.sh -m <active-model-id> "<summary>"
 ```
 
-- `<active-model-id>` is the concrete current model ID (that's you). E.g. `claude-sonnet-5`
-- `-p` is optional. If omitted, the script will attempt to infer the project name from the current Git repo.
-- `"summary"` is a _short_ description of the friction. It should be one or two sentences at most.
-
-The command records the runtime timestamp, project, model, and working directory in this fixed shape:
-
-```yaml
-version: 1
-papercuts:
-  - occurred_at: "<submission timestamp>"
-    project: "<source project>"
-    model: "<exact active model ID>"
-    cwd: "<source working directory>"
-    summary: "<what you were doing and what got in the way>"
-    suspected_cause: "<likely cause or fix, or null>"
-```
+- `<active-model-id>` is the concrete current model ID (that's you), e.g. `claude-sonnet-5`
+- `"summary"` is a 1-2 sentence description of the papercut.
 
 DO NOT check for duplicates. Submit the qualifying papercut and continue.

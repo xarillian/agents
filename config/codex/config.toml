@@ -1,0 +1,30 @@
+personality = "friendly"
+model = "gpt-5.6-terra"
+model_reasoning_effort = "xhigh"
+developer_instructions = ""
+[projects."/home/xarillian"]
+trust_level = "trusted"
+
+[projects."/run/media/xarillian/Topaz/knowledge-drive/LLMs"]
+trust_level = "trusted"
+
+[projects."/home/xarillian/dev/chorus-llm"]
+trust_level = "trusted"
+
+[projects."/home/xarillian/.agents"]
+trust_level = "trusted"
+
+[notice.model_migrations]
+"gpt-5.3-codex" = "gpt-5.4"
+
+[tui.model_availability_nux]
+"gpt-5.6-sol" = 4
+
+[hooks.state]
+
+[hooks.state."/home/xarillian/.codex/hooks.json:pre_tool_use:0:0"]
+trusted_hash = "sha256:0a3d5ecb5aa606d40fe846d41eb9db93182728840bcd20d4f8212b6d2414809d"
+
+[plugins."superpowers@openai-curated-remote"]
+enabled = false
+

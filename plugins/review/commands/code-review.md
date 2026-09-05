@@ -69,4 +69,6 @@ Return exactly one findings table using these columns:
 | --- | --- | --- | --- | --- |
 | *F1* | *Concise title* | c0-c100 <br> sev0-sev3 <br> X/N | `path:start`-`end` | **Evidence:** concise consolidated support<br>**Impact:** why it matters |
 
-Assign each consolidated observation a unique ID beginning with `F` and a sequential number, such as `F1`, `F2`, and `F3`. Use `<br>` between labeled evidence parts. Do not include coverage receipts, per-agent sections, rejected candidates, correction advice, recommendations, or direction. Order rows by severity from sev0 to sev3, then by confidence from highest to lowest. If there are no supported observations, state that there are no findings.
+Assign each consolidated observation a unique ID beginning with `F` and a sequential number, such as `F1`, `F2`, and `F3`. Use `<br>` between labeled evidence parts. Do not include coverage receipts, per-agent sections, rejected candidates, correction advice, recommendations, or direction. Order rows by severity from sev0 to sev3, then by confidence from highest to lowest.
+
+If there are no supported observations, state that there are no findings.

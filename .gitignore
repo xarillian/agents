@@ -1,5 +1,10 @@
 # Secret
 workflow/
+auth.json
 
 # Irrelevant
 .directory
+
+# Generated
+/AGENTS.md
+/skills/workstation
