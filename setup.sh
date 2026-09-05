@@ -36,6 +36,9 @@ rm -rf ~/.pi/agent/extensions ~/.pi/agent/themes
 ln -s "$REPO/config/pi/settings.json" ~/.pi/agent/settings.json
 ln -s "$REPO/AGENTS.md" ~/.pi/agent/AGENTS.md
 ln -s "$REPO/config/pi/themes" ~/.pi/agent/themes
+mkdir -p ~/.pi/agent/extensions/subagent
+ln -s "$REPO/config/pi/extensions/pi-subagents/config.json" \
+    ~/.pi/agent/extensions/subagent/config.json
 
 pi update --all
 
