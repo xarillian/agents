@@ -1,5 +1,5 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { Text } from "@earendil-works/pi-tui";
+import { type Component, Text } from "@earendil-works/pi-tui";
 import { createUsageStore } from "./store.ts";
 import {
 	type Provider,
@@ -35,17 +35,25 @@ const themeStyle = (theme: Theme): UsageStyle => ({
 	muted: (text) => theme.fg("muted", text),
 });
 
+const framed = (body: Component, theme: Theme): Component => ({
+	render(width) {
+		const rule = theme.fg("dim", "─".repeat(Math.max(0, width)));
+		return [rule, ...body.render(width), rule];
+	},
+	invalidate() {
+		body.invalidate();
+	},
+});
+
 export default function (pi: ExtensionAPI) {
 	let session: ExtensionContext | undefined;
 	const store = createUsageStore(() => providerForModel(session?.model?.provider));
 
-	// Rendered on every repaint so countdowns and freshness stay honest as the entry scrolls back.
 	pi.registerEntryRenderer<UsageEntry>("usage", (entry, _options, theme) => {
 		const snapshot = entry.data?.snapshot;
-		const body = snapshot
-			? usageLines(snapshot, themeStyle(theme)).join("\n")
-			: (entry.data?.message ?? "Usage unavailable");
-		return new Text(body, 1, 0);
+		if (!snapshot) return new Text(entry.data?.message ?? "Usage unavailable", 1, 0);
+		const body = new Text(usageLines(snapshot, themeStyle(theme)).join("\n"), 1, 0);
+		return framed(body, theme);
 	});
 
 	const setStatus = (ctx: ExtensionContext, provider: Provider, text: string) => {

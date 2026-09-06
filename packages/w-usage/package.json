@@ -1,7 +1,7 @@
 {
   "name": "w-usage",
   "description": "Rate-limit and usage monitoring.",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "private": true,
   "type": "module",
   "scripts": {
