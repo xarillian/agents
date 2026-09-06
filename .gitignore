@@ -1,6 +1,7 @@
 # Secret
 workflow/
 auth.json
+.credentials.json
 
 # Irrelevant
 .directory
