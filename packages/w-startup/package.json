@@ -1,7 +1,7 @@
 {
   "name": "w-startup",
   "description": "A resource-aware startup screen for Pi.",
-  "version": "0.1.0",
+  "version": "0.2.4",
   "private": true,
   "type": "module",
   "peerDependencies": {

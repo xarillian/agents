@@ -1,4 +1,5 @@
 import { basename, extname } from "node:path";
+import { pathToFileURL } from "node:url";
 import type {
 	ExtensionAPI,
 	ExtensionContext,
@@ -12,58 +13,84 @@ import {
 	SettingsManager,
 	VERSION,
 } from "@earendil-works/pi-coding-agent";
-import { truncateToWidth, wrapTextWithAnsi } from "@earendil-works/pi-tui";
+import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
 import { findDuplicateContextFiles } from "../w-deduplicate/index.ts";
 
 const DEDUPLICATED_MARKER = " †";
 
 type Theme = ExtensionContext["ui"]["theme"];
 
+type ResourceItem = {
+	label: string;
+	path: string;
+};
+
 type StartupResources = {
-	context: string[];
-	skills: string[];
-	prompts: string[];
-	extensions: string[];
+	context: ResourceItem[];
+	skills: ResourceItem[];
+	prompts: ResourceItem[];
+	extensions: ResourceItem[];
 };
 
 type CategoryRow = {
 	glyph: string;
 	label: string;
-	value: string;
+	items: ResourceItem[];
 };
 
 const PI_BLUE = "\x1b[38;2;80;180;230m";
 const RESET_FOREGROUND = "\x1b[39m";
-const LOGO = ["██████", "██  ██", "████  ██", "██    ██"];
+const LOGO = ["████████", "██    ██", "██    ██", "██    ██"];
 const LOGO_WIDTH = Math.max(...LOGO.map((line) => line.length));
 const METADATA_GAP = "   ";
 const CATEGORY_INDENT = " ".repeat(LOGO_WIDTH + METADATA_GAP.length);
 
+const CHIP_INDENT = `${CATEGORY_INDENT}  `;
+
+/** Wraps `label` in an OSC 8 hyperlink to `path`, falling back to plain text for an unresolvable path. */
+const hyperlink = (label: string, path: string): string => {
+	try {
+		return `\x1b]8;;${pathToFileURL(path).href}\x1b\\${label}\x1b]8;;\x1b\\`;
+	} catch {
+		return label;
+	}
+};
+
+/** Greedily packs pre-rendered chips onto lines by their visible width, since OSC 8 hyperlinks confuse wrapTextWithAnsi's word-boundary detection. */
+const wrapChips = (chips: string[], width: number): string[] => {
+	const lines: string[] = [];
+	let current = "";
+	for (const chip of chips) {
+		const candidate = current ? `${current} ${chip}` : chip;
+		if (current && visibleWidth(candidate) > width) {
+			lines.push(current);
+			current = chip;
+		} else {
+			current = candidate;
+		}
+	}
+	if (current) lines.push(current);
+	return lines;
+};
+
 const buildCategoryLines = (rows: CategoryRow[], theme: Theme, width: number): string[] => {
-	const prefixWidth = Math.max(...rows.map((row) => row.glyph.length + 1 + row.label.length)) + 2;
-	const continuationIndent = CATEGORY_INDENT + " ".repeat(prefixWidth);
-	const availableWidth = Math.max(1, width - CATEGORY_INDENT.length - prefixWidth);
+	const availableWidth = Math.max(1, width - CHIP_INDENT.length);
 
 	return rows.flatMap((row) => {
-		const label = theme.fg("dim", `${row.glyph} ${row.label}`.padEnd(prefixWidth));
-		const wrapped = wrapTextWithAnsi(theme.fg("dim", row.value), availableWidth);
-		return wrapped.map((line, index) => (index === 0 ? `${CATEGORY_INDENT}${label}${line}` : `${continuationIndent}${line}`));
+		const heading = `${CATEGORY_INDENT}${theme.fg("accent", `${row.glyph} ${row.label}`)}`;
+		const chips = row.items.map((item) => theme.fg("muted", hyperlink(`[${item.label}]`, item.path)));
+		const wrapped = wrapChips(chips, availableWidth);
+		return [heading, ...wrapped.map((line) => `${CHIP_INDENT}${line}`)];
 	});
 };
 
 const formatPath = (path: string) => path.replace(process.env.HOME ?? "", "~");
 
-const commandNames = (commands: SlashCommandInfo[], source: SlashCommandInfo["source"]): string[] =>
+const commandItems = (commands: SlashCommandInfo[], source: SlashCommandInfo["source"]): ResourceItem[] =>
 	commands
 		.filter((command) => command.source === source)
-		.map((command) => command.name.replace(/^skill:/, ""))
-		.sort((left, right) => left.localeCompare(right));
-
-const skillNames = (commands: SlashCommandInfo[]): string[] =>
-	commands
-		.filter((command) => command.source === "skill")
-		.map((command) => command.name.replace(/^skill:/, ""))
-		.sort((left, right) => left.localeCompare(right));
+		.map((command) => ({ label: command.name.replace(/^skill:/, ""), path: command.sourceInfo.path }))
+		.sort((left, right) => left.label.localeCompare(right.label));
 
 const extensionName = (path: string, metadata: PathMetadata): string => {
 	if (metadata.source.startsWith("npm:")) return metadata.source.slice(4);
@@ -86,13 +113,16 @@ const discoverResources = async (pi: ExtensionAPI, ctx: ExtensionContext): Promi
 	const deduplicatedPaths = findDuplicateContextFiles(contextFiles);
 
 	return {
-		context: contextFiles.map((file) => formatPath(file.path) + (deduplicatedPaths.has(file.path) ? DEDUPLICATED_MARKER : "")),
-		skills: skillNames(commands),
-		prompts: commandNames(commands, "prompt").map((name) => `/${name}`),
+		context: contextFiles.map((file) => ({
+			label: formatPath(file.path) + (deduplicatedPaths.has(file.path) ? DEDUPLICATED_MARKER : ""),
+			path: file.path,
+		})),
+		skills: commandItems(commands, "skill"),
+		prompts: commandItems(commands, "prompt").map((item) => ({ ...item, label: `/${item.label}` })),
 		extensions: resolved.extensions
 			.filter((extension) => extension.enabled)
-			.map((extension) => extensionName(extension.path, extension.metadata))
-			.sort((left, right) => left.localeCompare(right)),
+			.map((extension) => ({ label: extensionName(extension.path, extension.metadata), path: extension.path }))
+			.sort((left, right) => left.label.localeCompare(right.label)),
 	};
 };
 
@@ -119,10 +149,10 @@ export default function (pi: ExtensionAPI) {
 					"",
 					...buildCategoryLines(
 						[
-							{ glyph: "⌁", label: "context", value: resources.context.join(", ") },
-							{ glyph: "◆", label: "skills", value: resources.skills.join(", ") },
-							{ glyph: "▪", label: "extensions", value: resources.extensions.join(", ") },
-							{ glyph: "▸", label: "prompts", value: resources.prompts.join(", ") },
+							{ glyph: "⌁", label: "context", items: resources.context },
+							{ glyph: "◆", label: "skills", items: resources.skills },
+							{ glyph: "▪", label: "extensions", items: resources.extensions },
+							{ glyph: "▸", label: "prompts", items: resources.prompts },
 						],
 						theme,
 						width,
