@@ -5,7 +5,7 @@
   "defaultModel": "gpt-5.6-terra",
   "packages": [
     {
-      "source": "./packages/pi-usage"
+      "source": "./packages/w-usage"
     },
     {
       "source": "npm:pi-mcp-adapter"
@@ -17,7 +17,7 @@
       "source": "npm:pi-web-access"
     },
     {
-      "source": "./packages/pi-clear"
+      "source": "./packages/w-clear"
     }
   ],
   "subagents": {
