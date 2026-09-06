@@ -5,7 +5,9 @@ auth.json
 
 # Irrelevant
 .directory
+models-store.json
 
 # Generated
 /AGENTS.md
 /skills/workstation
+/generated/
