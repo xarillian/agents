@@ -1,5 +1,4 @@
 {
-  "model": "opus",
   "env": {
     "GIT_CONFIG_COUNT": "2",
     "GIT_CONFIG_KEY_0": "hook.stripAttribution.command",
@@ -7,6 +6,8 @@
     "GIT_CONFIG_KEY_1": "hook.stripAttribution.event",
     "GIT_CONFIG_VALUE_1": "commit-msg"
   },
+  "includeCoAuthoredBy": false,
+  "model": "opus",
   "enabledPlugins": {
     "clangd-lsp@claude-plugins-official": true,
     "superpowers@claude-plugins-official": false,
@@ -18,6 +19,6 @@
   "awaySummaryEnabled": false,
   "tui": "fullscreen",
   "autoMemoryEnabled": false,
-  "includeCoAuthoredBy": false,
-  "theme": "dark-daltonized"
+  "theme": "dark-daltonized",
+  "agentPushNotifEnabled": true
 }

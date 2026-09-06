@@ -132,7 +132,7 @@ MUST surface when an action would materially deviate from the explicit spec, the
 
 # Environment
 ## Useful CLI Tools
-`rg`, `fd`, `bat`, `eza`, `fzf`, `jq`, `git-delta`, `tldr`, `tree`, `less`, `nvtop`, `fnm`, `watchexec`, `entr`, `yq`, `lazygit`, `zoxide`, `gh`, `httpie`, `curlie`, `rsync`
+`rg`, `tmux`, `fd`, `bat`, `eza`, `fzf`, `jq`, `git-delta`, `tldr`, `tree`, `less`, `nvtop`, `fnm`, `watchexec`, `entr`, `yq`, `lazygit`, `zoxide`, `gh`, `httpie`, `curlie`, `rsync`
 
 - `rg -h` opens Ripgrep help; it is not Grep's `-h` / `--no-filename`. 
 - Use `rg --no-filename` when suppressing filenames.
