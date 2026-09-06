@@ -7,19 +7,28 @@ set -euo pipefail
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROFILE="technicolor"
 
+prune_repo_links() {
+    local destination="$1"
+    local source="$2"
+    local path
+    local link_target
+
+    [[ -d "$destination" ]] || return 0
+    while IFS= read -r -d '' path; do
+        link_target="$(readlink "$path")"
+        [[ "$link_target" == "$source/"* ]] && rm -f "$path"
+    done < <(find "$destination" -type l -print0)
+}
+
 link_config_tree() {
     local source="$1"
     local destination="$2"
     local path
     local relative_path
     local target
-    local link_target
 
     mkdir -p "$destination"
-    while IFS= read -r -d '' path; do
-        link_target="$(readlink "$path")"
-        [[ "$link_target" == "$source/"* ]] && rm -f "$path"
-    done < <(find "$destination" -type l -print0)
+    prune_repo_links "$destination" "$source"
 
     while IFS= read -r -d '' path; do
         relative_path="${path#"$source"/}"
@@ -58,6 +67,7 @@ cat "$REPO/profiles/$PROFILE/user-context.md" >> "$REPO/AGENTS.md"
 
 link_config_tree "$REPO/config/pi" "$HOME/.pi"
 mkdir -p ~/.pi/agent/packages
+prune_repo_links ~/.pi/agent/packages "$REPO/packages"
 rm -f ~/.pi/agent/AGENTS.md
 ln -s "$REPO/AGENTS.md" ~/.pi/agent/AGENTS.md
 for package in "$REPO"/packages/*; do
@@ -77,6 +87,8 @@ mkdir -p ~/.codex/skills
 rm -f ~/.codex/AGENTS.md
 ln -s "$REPO/AGENTS.md" ~/.codex/AGENTS.md
 
+prune_repo_links ~/.claude/skills "$REPO/skills"
+prune_repo_links ~/.codex/skills "$REPO/skills"
 for skill in "$REPO"/skills/*; do
     name="$(basename "$skill")"
     [[ "$name" == "workstation" ]] && continue

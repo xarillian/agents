@@ -1,12 +1,9 @@
 {
-  "name": "w-usage",
-  "description": "Rate-limit and usage monitoring.",
-  "version": "0.3.0",
+  "name": "w-startup",
+  "description": "A resource-aware startup screen for Pi.",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
-  "scripts": {
-    "test": "node --test tests/usage.test.ts"
-  },
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "*",
     "@earendil-works/pi-tui": "*"

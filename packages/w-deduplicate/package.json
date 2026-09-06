@@ -1,0 +1,16 @@
+{
+  "name": "w-deduplicate",
+  "description": "Removes repeated Pi context-file instructions from the system prompt.",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/deduplicate.test.ts"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*"
+  },
+  "pi": {
+    "extensions": ["./index.ts"]
+  }
+}

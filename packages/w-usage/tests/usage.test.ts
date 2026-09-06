@@ -1,54 +1,177 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+	type UsageSnapshot,
 	collectUsage,
 	compactCountdown,
 	discoverCredentials,
 	endpoints,
 	formatStatus,
-	formatUsage,
 	normalize,
+	plainStyle,
 	providerForModel,
 	remainingBar,
+	usageLines,
 } from "../usage.ts";
 
 function response(body: unknown, ok = true, status = 200) {
 	return { ok, status, json: async () => body };
 }
 
-test("renders fixed-width remaining bars and compact quota status", () => {
-	const now = Date.UTC(2026, 0, 2, 1, 34, 5);
+/** Local time, because the screen prints reset clocks in the reader's timezone. */
+const AFTERNOON = new Date(2026, 8, 5, 15, 0, 0).getTime();
+
+function screen(): UsageSnapshot {
+	const inTwoAndAHalfDays = AFTERNOON + (2 * 24 + 15) * 3_600_000;
+	return {
+		fetchedAt: AFTERNOON,
+		results: [
+			{
+				provider: "claude",
+				name: "Claude Code",
+				configured: true,
+				windows: [
+					{ label: "session (5h)", remaining: 87, resetAt: AFTERNOON + 56 * 60_000 },
+					{ label: "weekly (7d)", remaining: 81, resetAt: inTwoAndAHalfDays },
+					{ label: "weekly opus (7d)", remaining: 62, resetAt: inTwoAndAHalfDays },
+				],
+			},
+			{ provider: "codex", name: "Codex", configured: false, unavailable: "no credential" },
+			{ provider: "openrouter", name: "OpenRouter", configured: true, credits: { state: "balance", amount: 10, currency: "USD", decimals: 2 } },
+		],
+	};
+}
+
+test("renders fixed-width remaining bars", () => {
 	assert.equal(remainingBar(0), "[░░░░░░░░░░]");
 	assert.equal(remainingBar(51), "[█████░░░░░]");
 	assert.equal(remainingBar(100), "[██████████]");
 	assert.equal(remainingBar(60, "claude"), "[◆◆◆◆◆◆◇◇◇◇]");
+});
 
-	const presentation = normalize("codex", {
+test("puts freshness below a multiline title", () => {
+	const style = { ...plainStyle, heading: () => "USAGE\nUSAGE" };
+	assert.equal(usageLines(screen(), style, AFTERNOON)[0], "USAGE\nUSAGE\nupdated just now");
+});
+
+test("aligns every window into one column and drops providers you have no credential for", () => {
+	assert.deepEqual(usageLines(screen(), plainStyle, AFTERNOON), [
+		"Usage · updated just now",
+		"",
+		"◆ Claude Code",
+		"session (5h)     [◆◆◆◆◆◆◆◆◆◇]  87% remaining · resets in 56m (3:56 pm)",
+		"weekly (7d)      [◆◆◆◆◆◆◆◆◇◇]  81% remaining · resets in 2d15h (08/09 6:00 am)",
+		"weekly opus (7d) [◆◆◆◆◆◆◇◇◇◇]  62% remaining · resets in 2d15h (08/09 6:00 am)",
+		"",
+		"◇ OpenRouter",
+		"",
+		"Usage credits: $10.00 remaining",
+	]);
+});
+
+test("ages its own timestamp as the entry scrolls back, rather than freezing at fetch time", () => {
+	const lines = usageLines(screen(), plainStyle, AFTERNOON + 12 * 60_000);
+	assert.equal(lines[0], "Usage · updated 12m ago");
+	assert.match(lines[3]!, /resets in 44m \(3:56 pm\)/);
+});
+
+test("keeps a provider you configured but could not reach, so the failure stays visible", () => {
+	const snapshot: UsageSnapshot = {
+		fetchedAt: AFTERNOON,
+		results: [{ provider: "codex", name: "Codex", configured: true, unavailable: "request failed" }],
+	};
+	assert.deepEqual(usageLines(snapshot, plainStyle, AFTERNOON), [
+		"Usage · updated just now",
+		"",
+		"● Codex",
+		"unavailable (request failed)",
+	]);
+});
+
+test("discovers any window that names its own span, so a renamed key cannot silently drop a bar", () => {
+	const data = normalize("claude", {
+		seven_day_opus: { utilization: 38 },
+		five_hour: { utilization: 13 },
+		seven_day: { utilization: 19 },
+		thirty_day_experimental: { utilization: 5 },
+		account_uuid: "not-a-window",
+	});
+	assert.deepEqual(data, {
+		windows: [
+			{ label: "session (5h)", remaining: 87, resetAt: undefined },
+			{ label: "weekly (7d)", remaining: 81, resetAt: undefined },
+			{ label: "weekly opus (7d)", remaining: 62, resetAt: undefined },
+			{ label: "30d experimental", remaining: 95, resetAt: undefined },
+		],
+	});
+});
+
+test("ignores unnamed buckets and the extra-usage block, which only look like windows", () => {
+	assert.deepEqual(
+		normalize("claude", {
+			five_hour: { utilization: 13 },
+			nimbus_quill: { utilization: 0, limit_dollars: 20, remaining_dollars: 20, resets_at: 1 },
+			extra_usage: { utilization: 0, is_enabled: true, used_credits: 0, monthly_limit: 50 },
+			tangelo: { utilization: 0 },
+		}),
+		{ windows: [{ label: "session (5h)", remaining: 87, resetAt: undefined }] },
+	);
+});
+
+test("scales Anthropic's minor units by their exponent and keeps the account's own currency", () => {
+	assert.deepEqual(
+		normalize("claude", { spend: { enabled: true, balance: { amount_minor: 14_000, currency: "CAD", exponent: 2 } } }),
+		{ credits: { state: "balance", amount: 140, currency: "CAD", decimals: 2 } },
+	);
+	assert.deepEqual(
+		normalize("claude", { spend: { enabled: true, balance: { amount_minor: 9_500, currency: "JPY", exponent: 0 } } }),
+		{ credits: { state: "balance", amount: 9_500, currency: "JPY", decimals: 0 } },
+	);
+});
+
+test("says why usage credits are off, rather than leaving a bare switch", () => {
+	assert.deepEqual(
+		normalize("claude", { spend: { enabled: false, balance: null, disabled_reason: "out_of_credits" } }),
+		{ credits: { state: "off", reason: "out of credits" } },
+	);
+	assert.deepEqual(normalize("claude", { spend: { enabled: false, balance: null } }), { credits: { state: "off" } });
+	assert.deepEqual(normalize("codex", { credits: { has_credits: false, balance: "0" } }), { credits: { state: "off" } });
+	assert.deepEqual(normalize("codex", { credits: { unlimited: true } }), { credits: { state: "unlimited" } });
+	assert.deepEqual(
+		normalize("codex", { credits: { has_credits: true, balance: "7.25" } }),
+		{ credits: { state: "balance", amount: 7.25, currency: "USD", decimals: 2 } },
+	);
+});
+
+test("labels Codex windows by their declared duration, since the keys carry none", () => {
+	const now = Date.UTC(2026, 0, 2, 1, 34, 5);
+	const data = normalize("codex", {
 		rate_limit: {
-			primary_window: { used_percent: 49, limit_window_seconds: 18_000, reset_at: now + 90 * 60_000 },
 			secondary_window: { used_percent: 23, limit_window_seconds: 7 * 86_400, reset_at: now + (6 * 24 + 7) * 3_600_000 },
+			primary_window: { used_percent: 49, limit_window_seconds: 18_000, reset_at: now + 90 * 60_000 },
 		},
-	}, now);
-	assert.deepEqual(presentation, {
-		text: "5h [█████░░░░░] 51% remaining · resets in 1h30m · 7d [████████░░] 77% remaining · resets in 6d7h",
-		status: "51% ↻ 1h30m 77% ↻ 6d7h",
+	});
+	assert.deepEqual(data, {
+		windows: [
+			{ label: "session (5h)", remaining: 51, resetAt: now + 90 * 60_000 },
+			{ label: "weekly (7d)", remaining: 77, resetAt: now + (6 * 24 + 7) * 3_600_000 },
+		],
 	});
 	assert.equal(
-		formatStatus("codex", { provider: "codex", name: "Codex", text: presentation!.text, status: presentation!.status }),
+		formatStatus("codex", { provider: "codex", name: "Codex", configured: true, ...data! }, now),
 		"● codex 51% ↻ 1h30m 77% ↻ 6d7h",
 	);
 });
 
 test("shows OpenRouter account credits remaining without inventing quota semantics", () => {
-	assert.deepEqual(normalize("openrouter", { data: { total_credits: 14.6, total_usage: 1.2 } }), {
-		text: "$13.40 remaining",
-		status: "$13.40 left",
-	});
-	assert.deepEqual(normalize("openrouter", { data: { total_credits: 1, total_usage: 2 } }), {
-		text: "$0.00 remaining",
-		status: "$0.00 left",
-	});
+	const balance = (amount: number) => ({ state: "balance", amount, currency: "USD", decimals: 2 });
+	assert.deepEqual(normalize("openrouter", { data: { total_credits: 14.6, total_usage: 1.2 } }), { credits: balance(13.4) });
+	assert.deepEqual(normalize("openrouter", { data: { total_credits: 1, total_usage: 2 } }), { credits: balance(0) });
 	assert.equal(normalize("openrouter", { data: { total_credits: 4.6 } }), undefined);
+	assert.equal(
+		formatStatus("openrouter", { provider: "openrouter", name: "OpenRouter", configured: true, credits: balance(13.4) }),
+		"◇ openrouter $13.40 left",
+	);
 });
 
 test("formats reset countdowns and maps active providers safely", () => {
@@ -66,7 +189,7 @@ test("formats reset countdowns and maps active providers safely", () => {
 test("starts all provider requests concurrently and keeps successes after a failure", async () => {
 	let active = 0;
 	let maximumActive = 0;
-	const results = await collectUsage(
+	const snapshot = await collectUsage(
 		{
 			claude: { token: "claude" },
 			codex: { token: "codex", accountId: "account" },
@@ -81,27 +204,35 @@ test("starts all provider requests concurrently and keeps successes after a fail
 			if (url === endpoints.claude) return response({ five_hour: { utilization: 40 } });
 			return response({ data: { total_credits: 2, total_usage: 2 } });
 		},
+		AFTERNOON,
 	);
 
 	assert.equal(maximumActive, 3);
-	assert.equal(
-		formatUsage(results),
-		"Usage\n◆ Claude Code: 5h [◆◆◆◆◆◆◇◇◇◇] 60% remaining\n● Codex: unavailable (request failed)\n◇ OpenRouter: $0.00 remaining",
-	);
+	assert.deepEqual(snapshot.results, [
+		{ provider: "claude", name: "Claude Code", configured: true, windows: [{ label: "session (5h)", remaining: 60, resetAt: undefined }] },
+		{ provider: "codex", name: "Codex", configured: true, unavailable: "request failed" },
+		{ provider: "openrouter", name: "OpenRouter", configured: true, credits: { state: "balance", amount: 0, currency: "USD", decimals: 2 } },
+	]);
+	assert.equal(snapshot.fetchedAt, AFTERNOON);
 });
 
-test("reports each missing credential without making a request", async () => {
+test("reports each missing credential without making a request, and shows an empty screen", async () => {
 	let requests = 0;
-	const results = await collectUsage({}, async () => {
+	const snapshot = await collectUsage({}, async () => {
 		requests++;
 		return response({});
-	});
+	}, AFTERNOON);
 
 	assert.equal(requests, 0);
-	assert.equal(
-		formatUsage(results),
-		"Usage\n◆ Claude Code: unavailable (no credential)\n● Codex: unavailable (no credential)\n◇ OpenRouter: unavailable (no credential)",
+	assert.deepEqual(
+		snapshot.results.map((result) => [result.provider, result.configured, result.unavailable]),
+		[
+			["claude", false, "no credential"],
+			["codex", false, "no credential"],
+			["openrouter", false, "no credential"],
+		],
 	);
+	assert.deepEqual(usageLines(snapshot, plainStyle, AFTERNOON), ["Usage · updated just now"]);
 });
 
 test("treats unreadable credential files as absent", async () => {

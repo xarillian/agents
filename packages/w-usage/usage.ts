@@ -13,16 +13,37 @@ export interface Credential {
 	accountId?: string;
 }
 
+export interface UsageWindow {
+	label: string;
+	remaining: number;
+	resetAt?: number;
+}
+
+/** A purchasable balance, or the account switch being off, or an uncapped plan. */
+export type Credits =
+	| { state: "off"; reason?: string }
+	| { state: "unlimited" }
+	| { state: "balance"; amount: number; currency: string; decimals: number };
+
+export interface UsageData {
+	windows?: UsageWindow[];
+	credits?: Credits;
+}
+
 export interface UsageResult {
 	provider: Provider;
 	name: "Claude Code" | "Codex" | "OpenRouter";
-	text: string;
-	status: string;
+	/** False when no credential was found, which keeps unused providers off the screen entirely. */
+	configured: boolean;
+	windows?: UsageWindow[];
+	credits?: Credits;
+	unavailable?: string;
 }
 
-export interface UsagePresentation {
-	text: string;
-	status: string;
+/** Absolute timestamps only, so a rendered entry recomputes countdowns instead of freezing them. */
+export interface UsageSnapshot {
+	results: UsageResult[];
+	fetchedAt: number;
 }
 
 export interface CredentialSources {
@@ -40,23 +61,23 @@ export async function collectUsage(
 	credentials: Partial<Record<Provider, Credential | undefined>>,
 	fetcher: Fetch = fetch,
 	now = Date.now(),
-): Promise<UsageResult[]> {
-	return Promise.all([
-		collectProviderUsage("claude", credentials.claude, fetcher, now),
-		collectProviderUsage("codex", credentials.codex, fetcher, now),
-		collectProviderUsage("openrouter", credentials.openrouter, fetcher, now),
+): Promise<UsageSnapshot> {
+	const results = await Promise.all([
+		collectProviderUsage("claude", credentials.claude, fetcher),
+		collectProviderUsage("codex", credentials.codex, fetcher),
+		collectProviderUsage("openrouter", credentials.openrouter, fetcher),
 	]);
+	return { results, fetchedAt: now };
 }
 
 export async function collectProviderUsage(
 	provider: Provider,
 	credential: Credential | undefined,
 	fetcher: Fetch = fetch,
-	now = Date.now(),
 ): Promise<UsageResult> {
 	const name = providerName(provider);
-	if (!credential?.token) return unavailable(provider, name, "no credential");
-	if (provider === "codex" && !credential.accountId) return unavailable(provider, name, "no account");
+	if (!credential?.token) return { provider, name, configured: false, unavailable: "no credential" };
+	if (provider === "codex" && !credential.accountId) return { provider, name, configured: false, unavailable: "no account" };
 	try {
 		const response = await fetcher(endpoints[provider], {
 			method: "GET",
@@ -65,12 +86,12 @@ export async function collectProviderUsage(
 			signal: AbortSignal.timeout(10_000),
 		});
 		if (!response.ok) throw new Error("request failed");
-		const presentation = normalize(provider, await response.json(), now);
-		return presentation
-			? { provider, name, ...presentation }
-			: unavailable(provider, name, "unrecognized response");
+		const data = normalize(provider, await response.json());
+		return data
+			? { provider, name, configured: true, ...data }
+			: { provider, name, configured: true, unavailable: "unrecognized response" };
 	} catch {
-		return unavailable(provider, name, "request failed");
+		return { provider, name, configured: true, unavailable: "request failed" };
 	}
 }
 
@@ -96,9 +117,14 @@ function providerName(provider: Provider): UsageResult["name"] {
 	return provider === "claude" ? "Claude Code" : provider === "codex" ? "Codex" : "OpenRouter";
 }
 
-function unavailable(provider: Provider, name: UsageResult["name"], reason: string): UsageResult {
-	return { provider, name, text: `unavailable (${reason})`, status: "unavailable" };
-}
-
 export { discoverCredentials } from "./credentials.ts";
-export { compactCountdown, formatStatus, formatUsage, normalize, providerIcon, remainingBar } from "./presentation.ts";
+export {
+	compactCountdown,
+	formatStatus,
+	normalize,
+	plainStyle,
+	providerIcon,
+	remainingBar,
+	usageLines,
+	type UsageStyle,
+} from "./presentation.ts";
