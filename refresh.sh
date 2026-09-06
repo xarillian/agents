@@ -18,6 +18,7 @@ prune_repo_links() {
         link_target="$(readlink "$path")"
         [[ "$link_target" == "$source/"* ]] && rm -f "$path"
     done < <(find "$destination" -type l -print0)
+    return 0
 }
 
 link_config_tree() {
@@ -43,6 +44,7 @@ link_config_tree() {
         rm -rf "$target"
         ln -s "$path" "$target"
     done < <(find "$source" -mindepth 1 -print0)
+    return 0
 }
 
 if (($#)); then

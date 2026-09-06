@@ -1,29 +1,26 @@
 # Agent Harnesses
-Personal
+Personal, machine-aware setup for pi.dev, Claude Code, and Codex.
 
+This repo contains setup and update scripts for the supported harnesses, links this repository's configs to their appropriate directories, generated instructions, and manages bespoke packages and plugins.
 
-Central directory for personal chassis setup.
-
-## Scripts
-
-- `./setup.sh [--profile technicolor|treetops]` installs missing CLIs, configures the selected profile, and updates the tooling.
-- `./refresh.sh [--profile technicolor|treetops]` regenerates `AGENTS.md` and recreates local configuration and skill links without installing or updating anything.
-- `./update.sh` updates Pi and its packages, Claude Code and its plugins, and Codex.
-
-## Chassis
-
-### Claude Code
-Claude Code plugins live in the local marketplace:
+## Quick Start
 
 ```sh
-claude plugin marketplace add ~/.agents
-claude plugin install <plugin>@xarillian-agents --scope user --yes
+git clone https://github.com/xarillian/agents ~/.agents
+cd ~/.agents
+./setup.sh --profile <technicolor|treetops>
 ```
 
-### Codex
+- `refresh.sh --profile <technicolor|treetops` generates content and refreshes symlinks
+- `update.sh` manages updates for all bodies
 
-### pi.dev
+## Repo Map
 
-- `/clear` starts a new empty session.
-- `/usage` shows Claude Code, Codex, and OpenRouter usage.
-- ... `auth.json` should not live here.
+```text
+config/       Harness configuration, split by tool
+packages/     Local Pi extensions
+plugins/      Claude Code plugins
+profiles/     Per-machine or per-context overlays
+rules/        Shared operating rules
+skills/       Reusable agent skills
+```

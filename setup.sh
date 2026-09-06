@@ -52,6 +52,4 @@ if ! command -v codex >/dev/null; then
     curl -fsSL https://chatgpt.com/codex/install.sh | sh
 fi
 
-"$REPO/refresh.sh" --profile "$PROFILE"
-
-"$REPO/update.sh"
+"$REPO/update.sh" --profile "$PROFILE"
