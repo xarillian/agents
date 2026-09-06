@@ -205,3 +205,38 @@ test("stops fetching once the session shuts down", async (t) => {
 
 	assert.deepEqual(usage.at, [0], "shutdown ends the cadence and ignores stray events");
 });
+
+test("a fetch made elsewhere postpones the cadence, so a manual sweep is not doubled", async (t) => {
+	const tick = clock(t);
+	const usage = recorder();
+	const poller = createPoller(usage.fetch);
+
+	poller.start();
+	await tick(0);
+	await tick(30_000);
+
+	poller.note(true);
+	await tick(30_000);
+	assert.deepEqual(usage.at, [0], "the minute now runs from the outside fetch, not the last poll");
+
+	await tick(30_000);
+	assert.deepEqual(usage.at, [0, 90_000]);
+});
+
+test("a successful sweep revives a poller that had given up", async (t) => {
+	const tick = clock(t);
+	const usage = recorder();
+	usage.state.reachable = false;
+	const poller = createPoller(usage.fetch);
+
+	poller.start();
+	await tick(0);
+	await tick(2 * MINUTE);
+	await tick(5 * MINUTE);
+	assert.deepEqual(usage.at, [0, 2 * MINUTE, 7 * MINUTE], "the ladder is spent");
+
+	usage.state.reachable = true;
+	poller.note(true);
+	await tick(MINUTE);
+	assert.deepEqual(usage.at, [0, 2 * MINUTE, 7 * MINUTE, 8 * MINUTE], "proof it works restarts the clock");
+});

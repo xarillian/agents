@@ -5,7 +5,6 @@ type SortableWindow = UsageWindow & { key: string; seconds: number };
 
 const BAR_WIDTH = 10;
 
-/** The two lanes every provider meters, named for what they mean rather than how long they run. */
 const WINDOW_NAMES: Record<number, string> = {
 	18_000: "session",
 	604_800: "weekly",
@@ -20,7 +19,6 @@ const UNIT_SECONDS: Record<string, number> = {
 	minute: 60, hour: 3_600, day: 86_400, week: 604_800, month: 2_592_000,
 };
 
-/** Presentation seams so the same lines render plain for `-p` and themed in the TUI. */
 export interface UsageStyle {
 	heading(text: string): string;
 	provider(provider: Provider, text: string): string;
@@ -84,14 +82,19 @@ function reasonFor(value: unknown): { reason?: string } {
 export function usageLines(snapshot: UsageSnapshot, style: UsageStyle = plainStyle, now = Date.now()): string[] {
 	const visible = snapshot.results.filter((result) => result.configured);
 	const width = labelWidth(visible);
-	const heading = style.heading("Usage");
-	const updated = style.dim(`updated ${freshness(snapshot.fetchedAt, now)}`);
-	const lines = [heading.includes("\n") ? `${heading}\n${updated}` : `${heading} · ${updated}`];
+	const lines = [style.heading("Usage")];
 	for (const result of visible) {
-		lines.push("", style.provider(result.provider, `${providerIcon(result.provider)} ${result.name}`));
+		lines.push("", providerHeading(result, style, now));
 		lines.push(...resultLines(result, width, style, now));
 	}
 	return lines;
+}
+
+/** Each provider states its own age, since a sweep and the poll cadence land at different times. */
+function providerHeading(result: UsageResult, style: UsageStyle, now: number): string {
+	const title = style.provider(result.provider, `${providerIcon(result.provider)} ${result.name}`);
+	const age = freshness(result.fetchedAt, now);
+	return age ? `${title}${style.muted(" · ")}${style.dim(`updated ${age}`)}` : title;
 }
 
 export function formatStatus(provider: Provider, result: UsageResult, now = Date.now()): string {
@@ -145,7 +148,6 @@ function resetClause(resetAt: number | undefined, now: number): string {
 	return `resets in ${countdown} (${absoluteReset(resetAt!, now)})`;
 }
 
-/** Same-day resets read better as a bare clock time; anything further needs the date to be actionable. */
 function absoluteReset(resetAt: number, now: number): string {
 	const date = new Date(resetAt);
 	const hour = date.getHours();
@@ -154,7 +156,8 @@ function absoluteReset(resetAt: number, now: number): string {
 	return `${pad2(date.getDate())}/${pad2(date.getMonth() + 1)} ${clock}`;
 }
 
-function freshness(fetchedAt: number, now: number): string {
+function freshness(fetchedAt: unknown, now: number): string | undefined {
+	if (typeof fetchedAt !== "number" || !Number.isFinite(fetchedAt)) return undefined;
 	const seconds = Math.max(0, Math.round((now - fetchedAt) / 1000));
 	if (seconds < 45) return "just now";
 	const minutes = Math.round(seconds / 60);
@@ -191,10 +194,6 @@ function statusText(result: UsageResult, now: number): string {
 		.join(" ");
 }
 
-/**
- * Enumerates whatever windows the payload carries rather than naming them, so a provider
- * renaming a quota key drops a bar loudly at review time instead of silently at runtime.
- */
 function collectWindows(root: RecordValue | undefined): UsageWindow[] {
 	if (!root) return [];
 	const windows: SortableWindow[] = [];
@@ -230,7 +229,6 @@ function windowLabel(key: string, duration: number): string {
 	return `${qualifier ? `${name} ${qualifier}` : name} (${label})`;
 }
 
-/** `seven_day_fable` carries both its duration and the model it meters; `primary_window` carries neither. */
 function parseWindowKey(key: string): { seconds?: number; qualifier?: string } {
 	const parts = key.split("_");
 	const count = NUMBER_WORDS[parts[0] ?? ""];

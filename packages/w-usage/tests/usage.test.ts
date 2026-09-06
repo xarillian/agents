@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+	type UsageResult,
 	type UsageSnapshot,
 	collectUsage,
 	compactCountdown,
@@ -24,20 +25,27 @@ const AFTERNOON = new Date(2026, 8, 5, 15, 0, 0).getTime();
 function screen(): UsageSnapshot {
 	const inTwoAndAHalfDays = AFTERNOON + (2 * 24 + 15) * 3_600_000;
 	return {
-		fetchedAt: AFTERNOON,
 		results: [
 			{
 				provider: "claude",
 				name: "Claude Code",
 				configured: true,
+				fetchedAt: AFTERNOON,
 				windows: [
 					{ label: "session (5h)", remaining: 87, resetAt: AFTERNOON + 56 * 60_000 },
 					{ label: "weekly (7d)", remaining: 81, resetAt: inTwoAndAHalfDays },
 					{ label: "weekly opus (7d)", remaining: 62, resetAt: inTwoAndAHalfDays },
 				],
 			},
-			{ provider: "codex", name: "Codex", configured: false, unavailable: "no credential" },
-			{ provider: "openrouter", name: "OpenRouter", configured: true, credits: { state: "balance", amount: 10, currency: "USD", decimals: 2 } },
+			{ provider: "codex", name: "Codex", configured: false, fetchedAt: AFTERNOON, unavailable: "no credential" },
+			{
+				provider: "openrouter",
+				name: "OpenRouter",
+				configured: true,
+				// Swept a while before the poll cadence last touched Claude, which the screen has to admit.
+				fetchedAt: AFTERNOON - 12 * 60_000,
+				credits: { state: "balance", amount: 10, currency: "USD", decimals: 2 },
+			},
 		],
 	};
 }
@@ -49,41 +57,46 @@ test("renders fixed-width remaining bars", () => {
 	assert.equal(remainingBar(60, "claude"), "[◆◆◆◆◆◆◇◇◇◇]");
 });
 
-test("puts freshness below a multiline title", () => {
+test("leaves a multiline title alone, since freshness now belongs to each provider", () => {
 	const style = { ...plainStyle, heading: () => "USAGE\nUSAGE" };
-	assert.equal(usageLines(screen(), style, AFTERNOON)[0], "USAGE\nUSAGE\nupdated just now");
+	assert.equal(usageLines(screen(), style, AFTERNOON)[0], "USAGE\nUSAGE");
 });
 
-test("aligns every window into one column and drops providers you have no credential for", () => {
+test("dates each provider separately, because a sweep and the poll cadence land at different times", () => {
 	assert.deepEqual(usageLines(screen(), plainStyle, AFTERNOON), [
-		"Usage · updated just now",
+		"Usage",
 		"",
-		"◆ Claude Code",
+		"◆ Claude Code · updated just now",
 		"session (5h)     [◆◆◆◆◆◆◆◆◆◇]  87% remaining · resets in 56m (3:56 pm)",
 		"weekly (7d)      [◆◆◆◆◆◆◆◆◇◇]  81% remaining · resets in 2d15h (08/09 6:00 am)",
 		"weekly opus (7d) [◆◆◆◆◆◆◇◇◇◇]  62% remaining · resets in 2d15h (08/09 6:00 am)",
 		"",
-		"◇ OpenRouter",
+		"◇ OpenRouter · updated 12m ago",
 		"",
 		"Usage credits: $10.00 remaining",
 	]);
 });
 
-test("ages its own timestamp as the entry scrolls back, rather than freezing at fetch time", () => {
+test("ages every timestamp as the entry scrolls back, rather than freezing at fetch time", () => {
 	const lines = usageLines(screen(), plainStyle, AFTERNOON + 12 * 60_000);
-	assert.equal(lines[0], "Usage · updated 12m ago");
+	assert.equal(lines[2], "◆ Claude Code · updated 12m ago");
+	assert.equal(lines[7], "◇ OpenRouter · updated 24m ago");
 	assert.match(lines[3]!, /resets in 44m \(3:56 pm\)/);
+});
+
+test("says nothing about age for an entry saved before results carried their own timestamp", () => {
+	const legacy = { results: [{ provider: "codex", name: "Codex", configured: true } as unknown as UsageResult] };
+	assert.equal(usageLines(legacy, plainStyle, AFTERNOON)[2], "● Codex");
 });
 
 test("keeps a provider you configured but could not reach, so the failure stays visible", () => {
 	const snapshot: UsageSnapshot = {
-		fetchedAt: AFTERNOON,
-		results: [{ provider: "codex", name: "Codex", configured: true, unavailable: "request failed" }],
+		results: [{ provider: "codex", name: "Codex", configured: true, fetchedAt: AFTERNOON, unavailable: "request failed" }],
 	};
 	assert.deepEqual(usageLines(snapshot, plainStyle, AFTERNOON), [
-		"Usage · updated just now",
+		"Usage",
 		"",
-		"● Codex",
+		"● Codex · updated just now",
 		"unavailable (request failed)",
 	]);
 });
@@ -209,11 +222,22 @@ test("starts all provider requests concurrently and keeps successes after a fail
 
 	assert.equal(maximumActive, 3);
 	assert.deepEqual(snapshot.results, [
-		{ provider: "claude", name: "Claude Code", configured: true, windows: [{ label: "session (5h)", remaining: 60, resetAt: undefined }] },
-		{ provider: "codex", name: "Codex", configured: true, unavailable: "request failed" },
-		{ provider: "openrouter", name: "OpenRouter", configured: true, credits: { state: "balance", amount: 0, currency: "USD", decimals: 2 } },
+		{
+			provider: "claude",
+			name: "Claude Code",
+			configured: true,
+			fetchedAt: AFTERNOON,
+			windows: [{ label: "session (5h)", remaining: 60, resetAt: undefined }],
+		},
+		{ provider: "codex", name: "Codex", configured: true, fetchedAt: AFTERNOON, unavailable: "request failed" },
+		{
+			provider: "openrouter",
+			name: "OpenRouter",
+			configured: true,
+			fetchedAt: AFTERNOON,
+			credits: { state: "balance", amount: 0, currency: "USD", decimals: 2 },
+		},
 	]);
-	assert.equal(snapshot.fetchedAt, AFTERNOON);
 });
 
 test("reports each missing credential without making a request, and shows an empty screen", async () => {
@@ -232,7 +256,7 @@ test("reports each missing credential without making a request, and shows an emp
 			["openrouter", false, "no credential"],
 		],
 	);
-	assert.deepEqual(usageLines(snapshot, plainStyle, AFTERNOON), ["Usage · updated just now"]);
+	assert.deepEqual(usageLines(snapshot, plainStyle, AFTERNOON), ["Usage"]);
 });
 
 test("treats unreadable credential files as absent", async () => {

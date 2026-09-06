@@ -19,7 +19,6 @@ export interface UsageWindow {
 	resetAt?: number;
 }
 
-/** A purchasable balance, or the account switch being off, or an uncapped plan. */
 export type Credits =
 	| { state: "off"; reason?: string }
 	| { state: "unlimited" }
@@ -33,17 +32,15 @@ export interface UsageData {
 export interface UsageResult {
 	provider: Provider;
 	name: "Claude Code" | "Codex" | "OpenRouter";
-	/** False when no credential was found, which keeps unused providers off the screen entirely. */
 	configured: boolean;
+	fetchedAt: number;
 	windows?: UsageWindow[];
 	credits?: Credits;
 	unavailable?: string;
 }
 
-/** Absolute timestamps only, so a rendered entry recomputes countdowns instead of freezing them. */
 export interface UsageSnapshot {
 	results: UsageResult[];
-	fetchedAt: number;
 }
 
 export interface CredentialSources {
@@ -55,7 +52,7 @@ export interface CredentialSources {
 }
 
 type FetchResponse = { ok: boolean; status: number; json(): Promise<unknown> };
-type Fetch = (url: string, init: RequestInit) => Promise<FetchResponse>;
+export type Fetch = (url: string, init: RequestInit) => Promise<FetchResponse>;
 
 export async function collectUsage(
 	credentials: Partial<Record<Provider, Credential | undefined>>,
@@ -63,21 +60,22 @@ export async function collectUsage(
 	now = Date.now(),
 ): Promise<UsageSnapshot> {
 	const results = await Promise.all([
-		collectProviderUsage("claude", credentials.claude, fetcher),
-		collectProviderUsage("codex", credentials.codex, fetcher),
-		collectProviderUsage("openrouter", credentials.openrouter, fetcher),
+		collectProviderUsage("claude", credentials.claude, fetcher, now),
+		collectProviderUsage("codex", credentials.codex, fetcher, now),
+		collectProviderUsage("openrouter", credentials.openrouter, fetcher, now),
 	]);
-	return { results, fetchedAt: now };
+	return { results };
 }
 
 export async function collectProviderUsage(
 	provider: Provider,
 	credential: Credential | undefined,
 	fetcher: Fetch = fetch,
+	now = Date.now(),
 ): Promise<UsageResult> {
-	const name = providerName(provider);
-	if (!credential?.token) return { provider, name, configured: false, unavailable: "no credential" };
-	if (provider === "codex" && !credential.accountId) return { provider, name, configured: false, unavailable: "no account" };
+	const stamp = { provider, name: providerName(provider), fetchedAt: now };
+	if (!credential?.token) return { ...stamp, configured: false, unavailable: "no credential" };
+	if (provider === "codex" && !credential.accountId) return { ...stamp, configured: false, unavailable: "no account" };
 	try {
 		const response = await fetcher(endpoints[provider], {
 			method: "GET",
@@ -88,10 +86,10 @@ export async function collectProviderUsage(
 		if (!response.ok) throw new Error("request failed");
 		const data = normalize(provider, await response.json());
 		return data
-			? { provider, name, configured: true, ...data }
-			: { provider, name, configured: true, unavailable: "unrecognized response" };
+			? { ...stamp, configured: true, ...data }
+			: { ...stamp, configured: true, unavailable: "unrecognized response" };
 	} catch {
-		return { provider, name, configured: true, unavailable: "request failed" };
+		return { ...stamp, configured: true, unavailable: "request failed" };
 	}
 }
 

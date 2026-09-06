@@ -1,13 +1,10 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { Text } from "@earendil-works/pi-tui";
-import { type Poller, createPoller } from "./poller.ts";
+import { createUsageStore } from "./store.ts";
 import {
 	type Provider,
 	type UsageSnapshot,
 	type UsageStyle,
-	collectProviderUsage,
-	collectUsage,
-	discoverCredentials,
 	formatStatus,
 	plainStyle,
 	providerForModel,
@@ -39,8 +36,8 @@ const themeStyle = (theme: Theme): UsageStyle => ({
 });
 
 export default function (pi: ExtensionAPI) {
-	let refreshVersion = 0;
-	let poller: Poller | undefined;
+	let session: ExtensionContext | undefined;
+	const store = createUsageStore(() => providerForModel(session?.model?.provider));
 
 	// Rendered on every repaint so countdowns and freshness stay honest as the entry scrolls back.
 	pi.registerEntryRenderer<UsageEntry>("usage", (entry, _options, theme) => {
@@ -55,45 +52,34 @@ export default function (pi: ExtensionAPI) {
 		ctx.ui.setStatus("usage", ctx.ui.theme.fg(providerColor(provider), text));
 	};
 
-	const clearStatus = (ctx: ExtensionContext) => {
-		refreshVersion++;
-		ctx.ui.setStatus("usage", undefined);
-	};
-
-	/** Answers whether the provider was reachable, which is what paces the poller. */
-	const refreshStatus = async (ctx: ExtensionContext): Promise<boolean> => {
-		const version = ++refreshVersion;
+	const paint = () => {
+		const ctx = session;
+		if (!ctx?.hasUI) return;
 		const provider = providerForModel(ctx.model?.provider);
-		if (!provider) {
+		const result = provider && store.result(provider);
+		if (!provider || !result) {
 			ctx.ui.setStatus("usage", undefined);
-			return true;
+			return;
 		}
-		const current = () => version === refreshVersion && provider === providerForModel(ctx.model?.provider);
-		try {
-			const credentials = await discoverCredentials();
-			const result = await collectProviderUsage(provider, credentials[provider]);
-			if (current()) setStatus(ctx, provider, formatStatus(provider, result));
-			return !result.unavailable;
-		} catch {
-			if (current()) setStatus(ctx, provider, `${provider} unavailable`);
-			return false;
-		}
+		setStatus(ctx, provider, formatStatus(provider, result));
 	};
 
-	// Started here rather than in the factory, which also runs for invocations that never open a session.
+	store.subscribe(paint);
+
 	pi.on("session_start", (_event, ctx) => {
-		poller?.stop();
-		if (!ctx.hasUI) return;
-		poller = createPoller(() => refreshStatus(ctx));
-		poller.start();
+		session = ctx;
+		paint();
+		if (ctx.hasUI) store.start();
 	});
-	// A different provider makes the displayed numbers wrong, not merely stale, so this one skips the gap.
-	pi.on("model_select", () => poller?.refresh());
-	pi.on("turn_end", () => poller?.request());
+	pi.on("model_select", () => {
+		paint();
+		store.refresh();
+	});
+	pi.on("turn_end", () => store.request());
 	pi.on("session_shutdown", (_event, ctx) => {
-		poller?.stop();
-		poller = undefined;
-		clearStatus(ctx);
+		store.stop();
+		session = undefined;
+		ctx.ui.setStatus("usage", undefined);
 	});
 
 	pi.registerCommand("usage", {
@@ -105,19 +91,9 @@ export default function (pi: ExtensionAPI) {
 				if (ctx.mode === "print") process.stderr.write(`${message}\n`);
 				return;
 			}
-			const version = ++refreshVersion;
-			let snapshot: UsageSnapshot;
-			try {
-				snapshot = await collectUsage(await discoverCredentials());
-			} catch {
-				snapshot = await collectUsage({});
-			}
+			const snapshot = await store.refreshAll();
 			pi.appendEntry<UsageEntry>("usage", { snapshot });
 			if (ctx.mode === "print") process.stderr.write(`${usageLines(snapshot, plainStyle).join("\n")}\n`);
-			const provider = providerForModel(ctx.model?.provider);
-			const result = provider && snapshot.results.find((candidate) => candidate.provider === provider);
-			if (version === refreshVersion && provider && result) setStatus(ctx, provider, formatStatus(provider, result));
-			if (!provider) ctx.ui.setStatus("usage", undefined);
 		},
 	});
 }
