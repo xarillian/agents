@@ -1,5 +1,6 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { Text } from "@earendil-works/pi-tui";
+import { type Poller, createPoller } from "./poller.ts";
 import {
 	type Provider,
 	type UsageSnapshot,
@@ -39,6 +40,7 @@ const themeStyle = (theme: Theme): UsageStyle => ({
 
 export default function (pi: ExtensionAPI) {
 	let refreshVersion = 0;
+	let poller: Poller | undefined;
 
 	// Rendered on every repaint so countdowns and freshness stay honest as the entry scrolls back.
 	pi.registerEntryRenderer<UsageEntry>("usage", (entry, _options, theme) => {
@@ -58,30 +60,41 @@ export default function (pi: ExtensionAPI) {
 		ctx.ui.setStatus("usage", undefined);
 	};
 
-	const refreshStatus = async (ctx: ExtensionContext) => {
+	/** Answers whether the provider was reachable, which is what paces the poller. */
+	const refreshStatus = async (ctx: ExtensionContext): Promise<boolean> => {
 		const version = ++refreshVersion;
 		const provider = providerForModel(ctx.model?.provider);
 		if (!provider) {
 			ctx.ui.setStatus("usage", undefined);
-			return;
+			return true;
 		}
+		const current = () => version === refreshVersion && provider === providerForModel(ctx.model?.provider);
 		try {
 			const credentials = await discoverCredentials();
 			const result = await collectProviderUsage(provider, credentials[provider]);
-			if (version === refreshVersion && provider === providerForModel(ctx.model?.provider)) {
-				setStatus(ctx, provider, formatStatus(provider, result));
-			}
+			if (current()) setStatus(ctx, provider, formatStatus(provider, result));
+			return !result.unavailable;
 		} catch {
-			if (version === refreshVersion && provider === providerForModel(ctx.model?.provider)) {
-				setStatus(ctx, provider, `${provider} unavailable`);
-			}
+			if (current()) setStatus(ctx, provider, `${provider} unavailable`);
+			return false;
 		}
 	};
 
-	pi.on("session_start", (_event, ctx) => void refreshStatus(ctx));
-	pi.on("model_select", (_event, ctx) => void refreshStatus(ctx));
-	pi.on("agent_settled", (_event, ctx) => void refreshStatus(ctx));
-	pi.on("session_shutdown", (_event, ctx) => clearStatus(ctx));
+	// Started here rather than in the factory, which also runs for invocations that never open a session.
+	pi.on("session_start", (_event, ctx) => {
+		poller?.stop();
+		if (!ctx.hasUI) return;
+		poller = createPoller(() => refreshStatus(ctx));
+		poller.start();
+	});
+	// A different provider makes the displayed numbers wrong, not merely stale, so this one skips the gap.
+	pi.on("model_select", () => poller?.refresh());
+	pi.on("turn_end", () => poller?.request());
+	pi.on("session_shutdown", (_event, ctx) => {
+		poller?.stop();
+		poller = undefined;
+		clearStatus(ctx);
+	});
 
 	pi.registerCommand("usage", {
 		description: "Show Claude Code, Codex, and OpenRouter usage.",
