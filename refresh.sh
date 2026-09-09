@@ -47,6 +47,38 @@ link_config_tree() {
     return 0
 }
 
+link_skills() {
+    local source="$1"
+    local skill
+    local name
+
+    [[ -d "$source" ]] || return 0
+    for skill in "$source"/*; do
+        [[ -d "$skill" ]] || continue
+        [[ -L "$skill" ]] && continue
+        name="$(basename "$skill")"
+        rm -rf ~/.claude/skills/"$name" ~/.codex/skills/"$name"
+        ln -s "$skill" ~/.claude/skills/"$name"
+        ln -s "$skill" ~/.codex/skills/"$name"
+    done
+    return 0
+}
+
+link_profile_skills() {
+    local source="$1"
+    local skill
+    local name
+
+    [[ -d "$source" ]] || return 0
+    for skill in "$source"/*; do
+        [[ -d "$skill" ]] || continue
+        name="$(basename "$skill")"
+        rm -rf "$REPO/skills/$name"
+        ln -s "$skill" "$REPO/skills/$name"
+    done
+    return 0
+}
+
 if (($#)); then
     [[ $# == 2 && "$1" == "--profile" ]] || {
         echo "usage: $0 [--profile technicolor|treetops]"
@@ -59,10 +91,6 @@ fi
     echo "unknown profile: $PROFILE"
     exit 1
 }
-
-WORKSTATION="$REPO/profiles/$PROFILE/workstation"
-rm -rf "$REPO/skills/workstation"
-ln -s "$WORKSTATION" "$REPO/skills/workstation"
 
 sed '/^# User Context$/,$d' "$REPO/AGENTS.base.md" > "$REPO/AGENTS.md"
 cat "$REPO/profiles/$PROFILE/user-context.md" >> "$REPO/AGENTS.md"
@@ -89,16 +117,13 @@ mkdir -p ~/.codex/skills
 rm -f ~/.codex/AGENTS.md
 ln -s "$REPO/AGENTS.md" ~/.codex/AGENTS.md
 
+prune_repo_links "$REPO/skills" "$REPO/profiles"
+link_profile_skills "$REPO/profiles/$PROFILE/skills"
+
 prune_repo_links ~/.claude/skills "$REPO/skills"
 prune_repo_links ~/.codex/skills "$REPO/skills"
-for skill in "$REPO"/skills/*; do
-    name="$(basename "$skill")"
-    [[ "$name" == "workstation" ]] && continue
-    rm -rf ~/.claude/skills/"$name" ~/.codex/skills/"$name"
-    ln -s "$skill" ~/.claude/skills/"$name"
-    ln -s "$skill" ~/.codex/skills/"$name"
-done
+prune_repo_links ~/.claude/skills "$REPO/profiles"
+prune_repo_links ~/.codex/skills "$REPO/profiles"
 
-rm -rf ~/.claude/skills/workstation ~/.codex/skills/workstation
-ln -s "$WORKSTATION" ~/.claude/skills/workstation
-ln -s "$WORKSTATION" ~/.codex/skills/workstation
+link_skills "$REPO/skills"
+link_skills "$REPO/profiles/$PROFILE/skills"

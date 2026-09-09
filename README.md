@@ -11,7 +11,7 @@ cd ~/.agents
 ./setup.sh --profile <technicolor|treetops>
 ```
 
-- `refresh.sh --profile <technicolor|treetops` generates content and refreshes symlinks
+- `refresh.sh --profile <technicolor|treetops>` generates content and refreshes symlinks
 - `update.sh` manages updates for all bodies
 
 ## Repo Map
@@ -20,7 +20,7 @@ cd ~/.agents
 config/       Harness configuration, split by tool
 packages/     Local Pi extensions
 plugins/      Claude Code plugins
-profiles/     Per-machine or per-context overlays
+profiles/     Per-machine or per-context overlays, including profile-only skills
 rules/        Shared operating rules
 skills/       Reusable agent skills
 ```

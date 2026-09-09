@@ -5,8 +5,16 @@
 # cannot prove this and externally sourced trailers present a noise and seem
 # like a show of arrogance from the parent company.
 #
-# Registered by the GIT_CONFIG_* env in config/claude/settings.json, which names
-# this script plus the `commit-msg` event -- Git's fixed word for the moment the
-# message exists but the commit is not yet written. Env-scoped, so it only
-# applies to Claude Code's own sessions.
-sed -i '/^[[:space:]]*co-authored-by:/Id' "$1"
+# `grep -i` over `sed`: `sed -i` cannot be spelled portably (GNU takes an
+# optional suffix, BSD a mandatory one) and sed's `I` match modifier is an
+# extension that busybox accepts and ignores. Filter to a temp file and copy
+# back, preserving the message file's inode and mode.
+set -eu
+
+msg="${1:?usage: strip-attribution.sh <commit-msg-file>}"
+tmp="$(mktemp)"
+trap 'rm -f "$tmp"' EXIT HUP INT TERM
+
+# grep exits 1 when every line is filtered out, which is success here.
+grep -iv '^[[:space:]]*co-authored-by:' "$msg" >"$tmp" || [ $? -eq 1 ]
+cat "$tmp" >"$msg"

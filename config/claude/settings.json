@@ -1,12 +1,12 @@
 {
+  "cleanupPeriodDays": 99999,
   "env": {
-    "GIT_CONFIG_COUNT": "2",
-    "GIT_CONFIG_KEY_0": "hook.stripAttribution.command",
-    "GIT_CONFIG_VALUE_0": "~/.agents/config/claude/hooks/strip-attribution.sh",
-    "GIT_CONFIG_KEY_1": "hook.stripAttribution.event",
-    "GIT_CONFIG_VALUE_1": "commit-msg"
+    "_ZO_DOCTOR": "0"
   },
-  "includeCoAuthoredBy": false,
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
   "model": "opus",
   "enabledPlugins": {
     "clangd-lsp@claude-plugins-official": true,
@@ -17,6 +17,7 @@
   },
   "effortLevel": "high",
   "awaySummaryEnabled": false,
+  "promptSuggestionEnabled": false,
   "tui": "fullscreen",
   "autoMemoryEnabled": false,
   "theme": "dark-daltonized",

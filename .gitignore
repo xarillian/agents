@@ -1,13 +1,21 @@
-# Secret
+# Secret, gitignored for reasons of paranoia
 workflow/
 auth.json
 .credentials.json
+credentials.json
+.env
+
+# Profile-specific, gitignored for reasons of paranoia 
+profiles/*/skills/spinning-up-an-hsms-database/
 
 # Irrelevant
 .directory
 models-store.json
 
 # Generated
+# Perhaps not a scalable pattern
+# `pi` reads from `~/.agents/skills`
 /AGENTS.md
-/skills/workstation
-/generated/
+/skills/workstation 
+/skills/spinning-up-an-hsms-database
+generated/

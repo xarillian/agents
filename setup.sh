@@ -39,6 +39,8 @@ claude plugin marketplace add anthropics/claude-plugins-official
 claude plugin marketplace add openai/codex-plugin-cc
 claude plugin marketplace add "$REPO"
 
+# TODO: if profile ... treetops ... add marketplace https://gitlab.dev.ncconsulting.ca/consulting/agent-marketplace.git
+
 sed -n \
     '/"enabledPlugins": {/,/}/ s/^[[:space:]]*"\([^"]*\)": true,*/\1/p' \
     "$REPO/config/claude/settings.json" |
