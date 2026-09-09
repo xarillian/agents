@@ -1,7 +1,7 @@
 # Agent Harnesses
-Personal, machine-aware setup for pi.dev, Claude Code, and Codex.
+Personal setup for `pi`, Claude Code, or Codex depending on the machine.
 
-This repo contains setup and update scripts for the supported harnesses, links this repository's configs to their appropriate directories, generated instructions, and manages bespoke packages and plugins.
+This repo contains setup and update scripts for those harnesses, links 'em to their appropriate dirs, and generated instructions. Bespoke packages for `pi` and plugins for the chassis are stored here, as well.
 
 ## Quick Start
 
