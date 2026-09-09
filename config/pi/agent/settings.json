@@ -26,6 +26,9 @@
     },
     {
       "source": "./packages/w-deduplicate"
+    },
+    {
+      "source": "./packages/w-effort"
     }
   ],
   "subagents": {

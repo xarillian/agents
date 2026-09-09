@@ -1,7 +1,7 @@
 {
   "name": "w-clear",
-  "description": "Provides a Claude Code-like `/clear' to reset context.",
-  "version": "0.1.1",
+  "description": "Provides a Claude Code-like `/clear` that keeps the current model, in place of `/new`.",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "peerDependencies": {
