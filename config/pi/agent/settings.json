@@ -31,26 +31,31 @@
       "source": "./packages/w-effort"
     }
   ],
+  "enableSkillCommands": false,
+  "showHardwareCursor": false,
+  "editorPaddingX": 0,
+  "outputPad": 0,
+  "doubleEscapeAction": "tree",
   "subagents": {
     "agentOverrides": {
       "claude-code": {
         "disabled": true
-      },
+  },
       "claude-code-writer": {
         "disabled": true
       },
       "codex-exec": {
         "disabled": true
-      },
-      "codex-exec-writer": {
+  },
+  "codex-exec-writer": {
         "disabled": true
       },
-      "cursor-agent": {
+  "cursor-agent": {
         "disabled": true
       },
-      "cursor-agent-writer": {
+  "cursor-agent-writer": {
         "disabled": true
       }
     }
-  }
+  } 
 }

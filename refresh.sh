@@ -24,6 +24,7 @@ prune_repo_links() {
 link_config_tree() {
     local source="$1"
     local destination="$2"
+    local suffix="${3:-}"
     local path
     local relative_path
     local target
@@ -39,6 +40,8 @@ link_config_tree() {
             mkdir -p "$target"
             continue
         fi
+
+        [[ -z "$suffix" || "$path" == *"$suffix" ]] || continue
 
         mkdir -p "$(dirname "$target")"
         rm -rf "$target"
@@ -95,7 +98,7 @@ fi
 sed '/^# User Context$/,$d' "$REPO/AGENTS.base.md" > "$REPO/AGENTS.md"
 cat "$REPO/profiles/$PROFILE/user-context.md" >> "$REPO/AGENTS.md"
 
-link_config_tree "$REPO/config/pi" "$HOME/.pi"
+link_config_tree "$REPO/config/pi" "$HOME/.pi" .json
 mkdir -p ~/.pi/agent/packages
 prune_repo_links ~/.pi/agent/packages "$REPO/packages"
 rm -f ~/.pi/agent/AGENTS.md

@@ -1,8 +1,8 @@
 ---
 name: craft-pillar
 description: Reviews changes and audit scopes for deliberate construction, clarity, reuse, and project craft standards.
-model: "@medium"
-thinking-level: high
+model: "gpt-5.6-terra"
+thinking: high
 ---
 
 # Purpose

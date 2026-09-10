@@ -1,8 +1,8 @@
 ---
 name: simplifying-pillar
 description: Reviews changes and audit scopes for accidental complexity while preserving essential complexity.
-model: "@low"
-thinking-level: high
+model: "gpt-5.6-luna"
+thinking: high
 ---
 
 # Purpose

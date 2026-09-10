@@ -1,8 +1,8 @@
 ---
 name: failure-pillar
 description: Reviews changes and audit scopes for incorrect, hidden, or incomplete failure behavior.
-model: "@low"
-thinking-level: high
+model: "gpt-5.6-luna"
+thinking: high
 ---
 
 # Purpose

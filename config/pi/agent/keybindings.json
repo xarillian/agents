@@ -1,0 +1,4 @@
+{
+  "app.clear": [],
+  "tui.editor.deleteToLineStart": "ctrl+backspace"
+}

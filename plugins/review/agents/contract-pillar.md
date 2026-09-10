@@ -1,8 +1,8 @@
 ---
 name: contract-pillar
 description: Reviews changes and audit scopes for broken contracts, invariants, callers, integrations, and cutovers.
-model: "@low"
-thinking-level: xhigh
+model: "gpt-5.6-luna"
+thinking: xhigh
 ---
 
 # Purpose

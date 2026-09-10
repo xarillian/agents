@@ -1,8 +1,8 @@
 ---
 name: reviewer
 description: Correctness reviewer for evidence-backed behavioral issues in changes and audit scopes.
-model: "@medium"
-thinking-level: high
+model: "gpt-5.6-sol"
+thinking: high
 ---
 
 # Purpose
