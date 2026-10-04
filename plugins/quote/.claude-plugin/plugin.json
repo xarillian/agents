@@ -1,0 +1,7 @@
+{
+  "name": "quote",
+  "version": "0.1.0",
+  "description": "Highlight text, click Quote, and reply to it as a thread.",
+  "author": { "name": "Austin Wayne" },
+  "types": "./types/index.d.ts"
+}
