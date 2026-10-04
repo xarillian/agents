@@ -11,12 +11,13 @@ cd ~/.agents
 ./setup.sh --profile <technicolor|treetops>
 ```
 
-- `refresh.sh --profile <technicolor|treetops>` generates content and refreshes symlinks
+- `refresh.sh --profile <technicolor|treetops>` generates content, refreshes symlinks, and installs missing pi packages and Claude Code plugins
 - `update.sh` manages updates for all bodies
 
 ## Repo Map
 
 ```text
+commands/     Slash commands shared by Pi and Claude Code
 config/       Harness configuration, split by tool
 packages/     Local Pi extensions
 plugins/      Claude Code plugins

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Regerate instructions and link this repo's config, packages
-# and skills into local agent harnesses.
+# Regenerate instructions, link this repo's config, packages and
+# skills into local agent harnesses, and install any packages and
+# plugins they are missing.
 
 set -euo pipefail
 
@@ -67,6 +68,22 @@ link_skills() {
     return 0
 }
 
+link_commands() {
+    local destination="$1"
+    local command
+    local name
+
+    mkdir -p "$destination"
+    prune_repo_links "$destination" "$REPO/commands"
+    for command in "$REPO"/commands/*.md; do
+        [[ -f "$command" ]] || continue
+        name="$(basename "$command")"
+        rm -rf "$destination/$name"
+        ln -s "$command" "$destination/$name"
+    done
+    return 0
+}
+
 link_profile_skills() {
     local source="$1"
     local skill
@@ -78,6 +95,51 @@ link_profile_skills() {
         name="$(basename "$skill")"
         rm -rf "$REPO/skills/$name"
         ln -s "$skill" "$REPO/skills/$name"
+    done
+    return 0
+}
+
+require_command() {
+    command -v "$1" >/dev/null || {
+        echo "$1 is not installed; run setup.sh first" >&2
+        exit 1
+    }
+}
+
+# `pi install` rewrites every matching entry's spelling, so packages already
+# listed are left alone to keep settings.json from churning on each refresh.
+pi_package_installed() {
+    jq -e --arg source "packages/$1" \
+        '.packages // [] | any((.source? // .) | ltrimstr("./") == $source)' \
+        ~/.pi/agent/settings.json >/dev/null
+}
+
+install_pi_packages() {
+    local package
+    local name
+
+    for package in "$REPO"/packages/*; do
+        [[ -d "$package" ]] || continue
+        name="$(basename "$package")"
+        pi_package_installed "$name" && continue
+        (cd ~/.pi/agent && pi install "./packages/$name")
+    done
+    return 0
+}
+
+install_claude_plugins() {
+    local marketplace
+    local installed
+    local plugin
+    local name
+
+    marketplace="$(jq -r .name "$REPO/.claude-plugin/marketplace.json")"
+    claude plugin marketplace update "$marketplace"
+    installed="$(claude plugin list --json | jq -r '.[].id')"
+    for plugin in "$REPO"/plugins/*/; do
+        name="$(jq -r .name "$plugin/.claude-plugin/plugin.json")"
+        grep -qxF "$name@$marketplace" <<<"$installed" && continue
+        claude plugin install "$name@$marketplace" --scope user --yes
     done
     return 0
 }
@@ -95,6 +157,10 @@ fi
     exit 1
 }
 
+require_command pi
+require_command claude
+require_command jq
+
 sed '/^# User Context$/,$d' "$REPO/AGENTS.base.md" > "$REPO/AGENTS.md"
 cat "$REPO/profiles/$PROFILE/user-context.md" >> "$REPO/AGENTS.md"
 
@@ -109,11 +175,15 @@ for package in "$REPO"/packages/*; do
     rm -rf ~/.pi/agent/packages/"$name"
     ln -s "$package" ~/.pi/agent/packages/"$name"
 done
+link_commands ~/.pi/agent/prompts
+install_pi_packages
 
 link_config_tree "$REPO/config/claude" "$HOME/.claude"
 mkdir -p ~/.claude/skills
 rm -f ~/.claude/CLAUDE.md
 ln -s "$REPO/AGENTS.md" ~/.claude/CLAUDE.md
+link_commands ~/.claude/commands
+install_claude_plugins
 
 link_config_tree "$REPO/config/codex" "$HOME/.codex"
 mkdir -p ~/.codex/skills
