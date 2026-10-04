@@ -1,0 +1,14 @@
+{
+  "name": "w-hotkeys",
+  "description": "Claude Code hotkeys that Pi's keybindings cannot express, like Ctrl+C interrupting a run.",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*"
+  },
+  "pi": {
+    "extensions": ["./index.ts"]
+  }
+}
