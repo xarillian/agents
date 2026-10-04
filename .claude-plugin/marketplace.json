@@ -22,6 +22,36 @@
         "review",
         "quality"
       ]
+    },
+    {
+      "name": "quote",
+      "description": "Highlight text, click Quote, and reply to it as a thread.",
+      "source": "./plugins/quote",
+      "version": "0.1.0",
+      "author": {
+        "name": "Austin Wayne"
+      },
+      "category": "productivity",
+      "keywords": [
+        "reply",
+        "quote",
+        "mod"
+      ]
+    },
+    {
+      "name": "w-footer",
+      "description": "A resource-aware footer: context, cost, tokens and cache reuse under the prompt.",
+      "source": "./plugins/w-footer",
+      "version": "0.1.0",
+      "author": {
+        "name": "Austin Wayne"
+      },
+      "category": "productivity",
+      "keywords": [
+        "footer",
+        "usage",
+        "mod"
+      ]
     }
   ]
 }

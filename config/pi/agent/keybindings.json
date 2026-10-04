@@ -1,4 +1,10 @@
 {
-  "app.clear": [],
-  "tui.editor.deleteToLineStart": "ctrl+backspace"
+  "app.model.select": "alt+p",
+  "app.session.rename": "alt+r",
+  "tui.altScreen.top": "ctrl+home",
+  "tui.altScreen.bottom": "ctrl+end",
+  "tui.editor.cursorLineStart": ["home", "ctrl+a"],
+  "tui.editor.cursorLineEnd": ["end", "ctrl+e"],
+  "tui.editor.deleteWordBackward": ["ctrl+w", "alt+backspace", "ctrl+backspace"],
+  "tui.editor.deleteToLineStart": ["ctrl+u", "super+backspace"]
 }

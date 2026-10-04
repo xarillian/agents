@@ -19,3 +19,6 @@ models-store.json
 /skills/workstation 
 /skills/spinning-up-an-hsms-database
 generated/
+# Claude Code lays these beside each mod it loads
+plugins/*/.claude-plugin/types/
+plugins/*/tsconfig.json

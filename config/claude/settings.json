@@ -5,7 +5,8 @@
   },
   "attribution": {
     "commit": "",
-    "pr": ""
+    "pr": "",
+    "sessionUrl": false
   },
   "model": "opus",
   "enabledPlugins": {
@@ -13,13 +14,39 @@
     "superpowers@claude-plugins-official": false,
     "codex@openai-codex": true,
     "skill-creator@claude-plugins-official": true,
-    "review@xarillian-agents": true
+    "review@xarillian-agents": true,
+    "quote@xarillian-agents": true,
+    "cc-plugin-you-should-know@builtin": true,
+    "w-footer@xarillian-agents": true
+  },
+  "spinnerVerbs": {
+    "mode": "append",
+    "verbs": [
+      "Channelling",
+      "Consulting the void",
+      "Observing the mysteries",
+      "Pondering the secrets of the divine",
+      "Reaping"
+    ]
   },
   "effortLevel": "high",
-  "awaySummaryEnabled": false,
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "high"
+    }
+  },
   "promptSuggestionEnabled": false,
+  "awaySummaryEnabled": false,
+  "pluginConfigs": {
+    "agents-md@builtin": {
+      "options": {
+        "instructionFiles": "claude-md-and-agents-md"
+      }
+    }
+  },
   "tui": "fullscreen",
   "autoMemoryEnabled": false,
+  "bashEditDiffEnabled": false,
   "theme": "dark-daltonized",
   "agentPushNotifEnabled": true
 }

@@ -1,1 +1,11 @@
-{}
+{
+  "allowBrowserCookies": true,
+  "authFetch": {
+    "nexus": {
+      "hosts": ["nexusmods.com"],
+      "chromeProfile": "Pi Nexus",
+      "cache": "off"
+    }
+  }
+}
+

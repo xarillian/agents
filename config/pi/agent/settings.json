@@ -1,22 +1,22 @@
 {
-  "lastChangelogVersion": "0.85.1",
+  "lastChangelogVersion": "1.0.1",
   "theme": "dark",
   "tuiMode": "fullscreen",
   "quietStartup": true,
   "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.6-terra",
+  "defaultModel": "gpt-6-astra",
   "packages": [
     {
       "source": "./packages/w-usage"
     },
     {
-      "source": "npm:pi-mcp-adapter"
+      "source": "./packages/w-footer"
     },
     {
       "source": "npm:pi-subagents"
     },
     {
-      "source": "npm:pi-web-access"
+      "source": "./packages/w-web"
     },
     {
       "source": "./packages/w-clear"
@@ -29,6 +29,24 @@
     },
     {
       "source": "./packages/w-effort"
+    },
+    {
+      "source": "./packages/w-quote"
+    },
+    {
+      "source": "./packages/w-spinner-verbs"
+    },
+    {
+      "source": "./packages/w-hotkeys"
+    },
+    {
+      "source": "./packages/w-history"
+    },
+    {
+      "source": "./packages/w-compaction"
+    },
+    {
+      "source": "./packages/w-diviner"
     }
   ],
   "enableSkillCommands": false,
@@ -40,22 +58,22 @@
     "agentOverrides": {
       "claude-code": {
         "disabled": true
-  },
+      },
       "claude-code-writer": {
         "disabled": true
       },
       "codex-exec": {
         "disabled": true
-  },
-  "codex-exec-writer": {
+      },
+      "codex-exec-writer": {
         "disabled": true
       },
-  "cursor-agent": {
+      "cursor-agent": {
         "disabled": true
       },
-  "cursor-agent-writer": {
+      "cursor-agent-writer": {
         "disabled": true
       }
     }
-  } 
+  }
 }
