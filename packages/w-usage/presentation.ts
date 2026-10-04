@@ -126,6 +126,18 @@ export function compactCountdown(value: unknown, now = Date.now()): string | und
 	return `${Math.max(1, minutes)}m`;
 }
 
+export function usageCardLines(result: UsageResult, now = Date.now()): string[] {
+	if (result.unavailable) return [`Unavailable (${result.unavailable})`];
+	const windows = result.windows ?? [];
+	const width = labelWidth([result]);
+	const lines = windows.map((window) => {
+		const countdown = compactCountdown(window.resetAt, now);
+		return `${window.label.padEnd(width)}  ${window.remaining}% left${countdown ? ` ↻ ${countdown}` : ""}`;
+	});
+	if (result.credits !== undefined) lines.push(`Usage credits: ${creditsText(result.credits)}`);
+	return lines;
+}
+
 function resultLines(result: UsageResult, width: number, style: UsageStyle, now: number): string[] {
 	if (result.unavailable) return [style.dim(`unavailable (${result.unavailable})`)];
 	const lines = (result.windows ?? []).map((window) => windowLine(result.provider, window, width, style, now));

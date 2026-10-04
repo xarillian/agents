@@ -1,0 +1,7 @@
+{
+  "name": "w-footer",
+  "version": "0.1.0",
+  "description": "A resource-aware footer: context, cost, tokens and cache reuse under the prompt.",
+  "author": { "name": "Austin Wayne" },
+  "types": "./types/index.d.ts"
+}

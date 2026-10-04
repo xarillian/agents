@@ -1,6 +1,7 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { type Component, Text } from "@earendil-works/pi-tui";
 import { createUsageStore } from "./store.ts";
+import { USAGE_REQUEST, USAGE_UPDATE } from "./footer.ts";
 import {
 	type Provider,
 	type UsageSnapshot,
@@ -64,7 +65,8 @@ export default function (pi: ExtensionAPI) {
 		const ctx = session;
 		if (!ctx?.hasUI) return;
 		const provider = providerForModel(ctx.model?.provider);
-		const result = provider && store.result(provider);
+		const result = provider ? store.result(provider) : undefined;
+		pi.events.emit(USAGE_UPDATE, result);
 		if (!provider || !result) {
 			ctx.ui.setStatus("usage", undefined);
 			return;
@@ -73,6 +75,7 @@ export default function (pi: ExtensionAPI) {
 	};
 
 	store.subscribe(paint);
+	pi.events.on(USAGE_REQUEST, paint);
 
 	pi.on("session_start", (_event, ctx) => {
 		session = ctx;
@@ -87,6 +90,7 @@ export default function (pi: ExtensionAPI) {
 	pi.on("session_shutdown", (_event, ctx) => {
 		store.stop();
 		session = undefined;
+		pi.events.emit(USAGE_UPDATE, undefined);
 		ctx.ui.setStatus("usage", undefined);
 	});
 
