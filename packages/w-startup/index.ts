@@ -15,6 +15,7 @@ import {
 } from "@earendil-works/pi-coding-agent";
 import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
 import { findDuplicateContextFiles } from "../w-deduplicate/index.ts";
+import { createAnimatedLogo, LOGO_WIDTH } from "./logo.ts";
 
 const DEDUPLICATED_MARKER = " †";
 
@@ -38,10 +39,6 @@ type CategoryRow = {
 	items: ResourceItem[];
 };
 
-const PI_BLUE = "\x1b[38;2;80;180;230m";
-const RESET_FOREGROUND = "\x1b[39m";
-const LOGO = ["████████", "██    ██", "██    ██", "██    ██"];
-const LOGO_WIDTH = Math.max(...LOGO.map((line) => line.length));
 const METADATA_GAP = "   ";
 const CATEGORY_INDENT = " ".repeat(LOGO_WIDTH + METADATA_GAP.length);
 
@@ -127,40 +124,47 @@ const discoverResources = async (pi: ExtensionAPI, ctx: ExtensionContext): Promi
 };
 
 export default function (pi: ExtensionAPI) {
+	let animation: ReturnType<typeof createAnimatedLogo> | undefined;
+	pi.on("session_shutdown", () => animation?.dispose());
+
 	pi.on("session_start", async (_event, ctx) => {
+		animation?.dispose();
 		if (ctx.mode !== "tui") return;
 
 		const resources = await discoverResources(pi, ctx);
-		ctx.ui.setHeader((_tui, theme) => ({
-			render(width: number): string[] {
-				const logo = (line: string) => `${PI_BLUE}${line}${RESET_FOREGROUND}`;
-				const model = ctx.model?.id ?? "no model";
-				const provider = ctx.model?.provider ?? "no provider";
-				const metadata = [
-					logo(LOGO[0].padEnd(LOGO_WIDTH)),
-					`${logo(LOGO[1].padEnd(LOGO_WIDTH))}${METADATA_GAP}${theme.fg("text", `${theme.bold("pi")} v${VERSION}`)}`,
-					`${logo(LOGO[2].padEnd(LOGO_WIDTH))}${METADATA_GAP}${theme.fg("text", model)}${theme.fg("muted", " · ")}${theme.fg("muted", provider)}`,
-					`${logo(LOGO[3].padEnd(LOGO_WIDTH))}${METADATA_GAP}${theme.fg("muted", formatPath(ctx.cwd))}`,
-				].map((line) => truncateToWidth(line, width));
+		ctx.ui.setHeader((tui, theme) => {
+			const logo = createAnimatedLogo(() => tui.requestRender());
+			animation = logo;
+			return {
+				render(width: number): string[] {
+					const model = ctx.model?.id ?? "no model";
+					const provider = ctx.model?.provider ?? "no provider";
+					const beside = [
+						"",
+						theme.fg("text", `${theme.bold("pi")} v${VERSION}`),
+						`${theme.fg("text", model)}${theme.fg("muted", " · ")}${theme.fg("muted", provider)}`,
+						theme.fg("muted", formatPath(ctx.cwd)),
+					];
+					const metadata = logo.render().map((line, row) => `${line}${METADATA_GAP}${beside[row] ?? ""}`);
 
-				return [
-					...metadata,
-					"",
-					"",
-					...buildCategoryLines(
-						[
-							{ glyph: "⌁", label: "context", items: resources.context },
-							{ glyph: "◆", label: "skills", items: resources.skills },
-							{ glyph: "▪", label: "extensions", items: resources.extensions },
-							{ glyph: "▸", label: "prompts", items: resources.prompts },
-						],
-						theme,
-						width,
-					),
-					"",
-				];
-			},
-			invalidate() {},
-		}));
+					return [
+						...metadata,
+						...buildCategoryLines(
+							[
+								{ glyph: "⌁", label: "context", items: resources.context },
+								{ glyph: "◆", label: "skills", items: resources.skills },
+								{ glyph: "▪", label: "extensions", items: resources.extensions },
+								{ glyph: "▸", label: "prompts", items: resources.prompts },
+							],
+							theme,
+							width,
+						),
+						"",
+					].map((line) => truncateToWidth(line, width));
+				},
+				invalidate() {},
+				dispose: logo.dispose,
+			};
+		});
 	});
 }
