@@ -127,20 +127,32 @@ install_pi_packages() {
     return 0
 }
 
+add_claude_marketplaces() {
+    claude plugin marketplace add anthropics/claude-plugins-official
+    claude plugin marketplace add openai/codex-plugin-cc
+    claude plugin marketplace add "$REPO"
+    claude plugin marketplace update "$(jq -r .name "$REPO/.claude-plugin/marketplace.json")"
+
+    # TODO: if profile ... treetops ... add marketplace https://gitlab.dev.ncconsulting.ca/consulting/agent-marketplace.git
+}
+
+# Builtin plugins ship inside Claude Code; enabling them in settings is
+# the whole install.
+enabled_claude_plugins() {
+    jq -r '.enabledPlugins | to_entries[]
+        | select(.value and (.key | endswith("@builtin") | not)) | .key' \
+        "$REPO/config/claude/settings.json"
+}
+
 install_claude_plugins() {
-    local marketplace
     local installed
     local plugin
-    local name
 
-    marketplace="$(jq -r .name "$REPO/.claude-plugin/marketplace.json")"
-    claude plugin marketplace update "$marketplace"
     installed="$(claude plugin list --json | jq -r '.[].id')"
-    for plugin in "$REPO"/plugins/*/; do
-        name="$(jq -r .name "$plugin/.claude-plugin/plugin.json")"
-        grep -qxF "$name@$marketplace" <<<"$installed" && continue
-        claude plugin install "$name@$marketplace" --scope user --yes
-    done
+    while IFS= read -r plugin; do
+        grep -qxF "$plugin" <<<"$installed" && continue
+        claude plugin install "$plugin" --scope user --yes
+    done < <(enabled_claude_plugins)
     return 0
 }
 
@@ -183,6 +195,7 @@ mkdir -p ~/.claude/skills
 rm -f ~/.claude/CLAUDE.md
 ln -s "$REPO/AGENTS.md" ~/.claude/CLAUDE.md
 link_commands ~/.claude/commands
+add_claude_marketplaces
 install_claude_plugins
 
 link_config_tree "$REPO/config/codex" "$HOME/.codex"

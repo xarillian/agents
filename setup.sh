@@ -31,23 +31,6 @@ if ! command -v claude >/dev/null; then
     curl -fsSL https://claude.ai/install.sh | sh
 fi
 
-claude plugin marketplace remove claude-plugins-official || true
-claude plugin marketplace remove openai-codex || true
-claude plugin marketplace remove xarillian-agents || true
-
-claude plugin marketplace add anthropics/claude-plugins-official
-claude plugin marketplace add openai/codex-plugin-cc
-claude plugin marketplace add "$REPO"
-
-# TODO: if profile ... treetops ... add marketplace https://gitlab.dev.ncconsulting.ca/consulting/agent-marketplace.git
-
-sed -n \
-    '/"enabledPlugins": {/,/}/ s/^[[:space:]]*"\([^"]*\)": true,*/\1/p' \
-    "$REPO/config/claude/settings.json" |
-while IFS= read -r plugin; do
-    claude plugin install "$plugin" --scope user --yes
-done
-
 ## == Codex ==
 if ! command -v codex >/dev/null; then
     echo "codex is not installed; installing..."
