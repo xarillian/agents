@@ -10,6 +10,7 @@ profiles/*/skills/spinning-up-an-hsms-database/
 
 # Irrelevant
 .directory
+.DS_Store
 models-store.json
 
 # Generated
