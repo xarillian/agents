@@ -158,13 +158,13 @@ install_claude_plugins() {
 
 if (($#)); then
     [[ $# == 2 && "$1" == "--profile" ]] || {
-        echo "usage: $0 [--profile technicolor|treetops]"
+        echo "usage: $0 [--profile technicolor|treetops|kaleidoscope]"
         exit 1
     }
     PROFILE="$2"
 fi
 
-[[ "$PROFILE" == "technicolor" || "$PROFILE" == "treetops" ]] || {
+[[ "$PROFILE" == "technicolor" || "$PROFILE" == "treetops" || "$PROFILE" == "kaleidoscope" ]] || {
     echo "unknown profile: $PROFILE"
     exit 1
 }

@@ -8,10 +8,10 @@ This repo contains setup and update scripts for those harnesses, links 'em to th
 ```sh
 git clone https://github.com/xarillian/agents ~/.agents
 cd ~/.agents
-./setup.sh --profile <technicolor|treetops>
+./setup.sh --profile <technicolor|treetops|kaleidoscope>
 ```
 
-- `refresh.sh --profile <technicolor|treetops>` generates content, refreshes symlinks, adds Claude Code marketplaces, and installs missing pi packages and Claude Code plugins
+- `refresh.sh --profile <technicolor|treetops|kaleidoscope>` generates content, refreshes symlinks, adds Claude Code marketplaces, and installs missing pi packages and Claude Code plugins
 - `update.sh` manages updates for all bodies
 
 ## Source of Truth
