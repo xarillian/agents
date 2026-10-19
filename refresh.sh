@@ -132,7 +132,10 @@ add_claude_marketplaces() {
     claude plugin marketplace add xarillian/agents
     claude plugin marketplace update "$(jq -r .name "$REPO/.claude-plugin/marketplace.json")"
 
-    # TODO: if profile ... treetops ... add marketplace https://gitlab.dev.ncconsulting.ca/consulting/agent-marketplace.git
+    if [[ "$PROFILE" == "treetops" ]]; then
+        claude plugin marketplace add https://gitlab.dev.ncconsulting.ca/consulting/agent-marketplace.git
+    fi
+    return 0
 }
 
 # Builtin plugins ship inside Claude Code; enabling them in settings is
@@ -143,13 +146,21 @@ enabled_claude_plugins() {
         "$REPO/config/claude/settings.json"
 }
 
+# Settings are shared across profiles, but some marketplaces are added
+# only on one profile; their plugins are skipped everywhere else.
 install_claude_plugins() {
     local installed
+    local marketplaces
     local plugin
 
     installed="$(claude plugin list --json | jq -r '.[].id')"
+    marketplaces="$(claude plugin marketplace list --json | jq -r '.[].name')"
     while IFS= read -r plugin; do
         grep -qxF "$plugin" <<<"$installed" && continue
+        grep -qxF "${plugin#*@}" <<<"$marketplaces" || {
+            echo "skipping $plugin: marketplace ${plugin#*@} is not added on $PROFILE" >&2
+            continue
+        }
         claude plugin install "$plugin" --scope user --yes
     done < <(enabled_claude_plugins)
     return 0
