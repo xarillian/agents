@@ -1,17 +1,15 @@
 ---
 name: developing-on-kaleidoscope
-description: Use when building, changing, deploying, or checking an app in ~/dev that kaleidoscope serves or will serve on the tailnet, including work started from ~ and checking a change in the browser.
+description: Use when creating, modifying, deploying, or just examining a dir in `~/dev` or `~/server` that kaleidoscope serves or will serve on the tailnet, including work started from home (~).
 ---
 
-# Developing on kaleidoscope
+# Development Guidance
 
-Apps live in `~/dev`; kaleidoscope serves them on the tailnet from `~/server`. This skill covers the loop every app shares: find the app, change it, deploy it, check it where xarillian can see it, commit. An app's own skill holds what is particular to it. The server's skills (`~/server/.agents/skills/`) hold how it is hosted.
+Apps live in `~/dev` on kaleidoscope. We serve them on the tailnet from `~/server`.
 
-## Where xarillian is
+It is likely Austin is not on the same machine and is SSH'ing into the device. As a first step, always find the address they hail from with `$SSH_CLIENT` and the device with `tailscale status`.
 
-Over SSH, never at the machine: from technicolor, their Linux desktop, or from monochrome, their iPhone. `$SSH_CLIENT` holds the address they came from; `tailscale status` names its device. From monochrome they type on a phone, so keep any command you hand them on one line.
-
-They see only the live app, at `https://<service>.<tailnet>.ts.net`. A change that is not deployed is not done, and `localhost` means nothing to them.
+During development, develop against the live app: `https://<service>.<tailnet>.ts.net`. The first step for any greenfield development should be setting up the tailnet service. Use existing files as reference and ensure they align; point out if there isn't alignment between tailscale deployments. We should ensure consistency!
 
 ## Deploy
 
@@ -19,25 +17,21 @@ They see only the live app, at `https://<service>.<tailnet>.ts.net`. A change th
 cd ~/server/services/<service> && docker compose up -d --build
 ```
 
-The build copies the working tree, uncommitted changes included. Never copy files into a running container instead: recreating it drops them, and the container stops matching its image.
+The build copies the working tree, including uncommitted changes. Don't copy files into a running container.
 
-Before a deploy that changes the schema, copy the live data out: stop the service, `docker cp <container>:<data path> <scratchpad>`, then deploy.
+## Local Development
 
-Confirm the deploy before checking it: the container serves what it was built with. Look for a string from the change, retrying for up to two minutes while it starts:
+kaleidoscope currently does not resolve its own services -- if it is updated to, remedy this line. From here, use `http://127.0.0.1:<port>`.
 
-```sh
-for i in $(seq 1 24); do curl -s http://127.0.0.1:<port>/<file> | rg -qF '<new string>' && echo served && break; sleep 5; done
-```
+Some apps learn "who" from the `Tailscale-User-Login` header that `tailscale serve` adds. On localhost it is missing, so it answers `401`. Pass it to `curl` with `-H`: `-H 'Tailscale-User-Login: xarillian@github'`.
 
-"It still shows the old thing" almost always means the container predates the change: compare `docker inspect <container> --format '{{.Created}}'` with the files' times, then redeploy.
+We don't need dev servers polluting the tailnet; we can just do development live against the server.
 
-## Reaching the live app
+Note that live apps hold real data. It is wise to test migrations prior to deploying them. Make sure to confirm with xarillian before any change that creates, modifies, or deletes data.
 
-kaleidoscope never resolves its own services: `tag:server` holds no grant to them. From here, use `http://127.0.0.1:<port>`.
+Some apps and some servers have their own skills, commands, context, et al. Check for either .agents and .claude dirs in a server or application dir if those files aren't already in context. 
 
-Some apps learn who is asking from the `Tailscale-User-Login` header that `tailscale serve` adds. On `127.0.0.1` it is missing, and they answer `401`. Pass it to `curl` with `-H 'Tailscale-User-Login: xarillian@github'`. A browser cannot add it: check those apps in xarillian's browser on the tailnet name, or run the app's dev server as its README says, on a spare port. Never publish a dev server on the tailnet.
-
-## Checking in the browser
+## Browser Use
 
 Use Claude in Chrome. Load the core browser tools in one ToolSearch call first.
 
@@ -51,26 +45,13 @@ Use Claude in Chrome. Load the core browser tools in one ToolSearch call first.
 - **Globals that vanish mean the page reloaded**, often by xarillian. `performance.now()` gives milliseconds since load.
 - **Close your tab** when done, and restore any window size you changed.
 
-## The data is real
-
-The live apps hold real data.
-
-- Prefer checks that change nothing: read state, open and cancel a confirm.
-- Undo what a test changes, and check it is back.
-- Ask before anything that creates or deletes real data.
-- Ask before anything that notifies a real phone.
-- An app's own skill names its test data.
-
-## Hand-offs
-
-`sudo` needs a real terminal, which agents lack. Write the files, lint them, and hand xarillian the exact commands.
+If you find any part of this guide to be untrue, check with xarillian about updating it. "Claude in Chrome" will likely update over time.
 
 ## Git
 
-- Commit only when xarillian asks; push only when they ask.
-- Each repo's `git log` sets its message style. Read it before writing one.
-- No attribution trailers.
-- Other agents may be working in the same repo. Changes you did not make are theirs: leave them alone and out of your commits.
+- Commit and push only when xarillian asks (you can prompt them to do this, though).
+- Each repo's `git log` sets its message style. Read it and mock the style. Typically you should use one liners, easily digestible, and intuitive.
+- Do not commit private information about the tailnet, e.g. a list of all services or apps.
 
 ## Toolchain
 
@@ -79,4 +60,5 @@ The live apps hold real data.
 | `node`, `npm` | MacPorts, `/opt/local/bin` |
 | `cargo`, `rustc` | rustup, `~/.cargo/bin` |
 | `docker` | Colima, through the `kaleidoscope` context |
-| `gh` | Not installed; ask before installing it (`installing-software`) |
+| `gh` | Not installed; ask before installing it (`installing-software`). If it is installed, update this line of this skill. |
+
