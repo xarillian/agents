@@ -1,7 +1,7 @@
 ---
 name: workstation
 description: >-
-  Host-specific facts for the user's workstation. Use for hardware, drivers, or desktop/session infrastructure. Do not use for ordinary application or developer-tool configuration.
+  Host-specific facts for treetops, the current device. Use for hardware, drivers, or desktop/session infrastructure. Do not use for ordinary application or developer-tool configuration.
 ---
 
 # Environment
