@@ -1,7 +1,7 @@
 ---
 name: papercuts
 description: >-
-  Interrupt work and use when a friction occurs. If a tool call fails, a command is flaky, or a setup step is confusing, use this skill. Do not use for command failures, bad inputs, typos, or one-off mistakes.
+  Interrupt work and use when friction occurs: a tool call fails, a command is flaky, a documented tool is missing, or a setup step is confusing. The skill decides whether the friction is worth recording.
 ---
 
 # Papercuts
