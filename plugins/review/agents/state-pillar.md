@@ -1,7 +1,7 @@
 ---
 name: state-pillar
 description: Reviews changes and audit scopes for lifecycle, ordering, concurrency, and repeated-execution defects.
-model: "claude-opus-5-5"
+model: sonnet
 thinking: xhigh
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: contract-pillar
 description: Reviews changes and audit scopes for broken contracts, invariants, callers, integrations, and cutovers.
-model: "claude-opus-5-5"
+model: sonnet
 thinking: xhigh
 ---
 

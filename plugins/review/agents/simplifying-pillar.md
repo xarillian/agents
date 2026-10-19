@@ -1,7 +1,7 @@
 ---
 name: simplifying-pillar
 description: Reviews changes and audit scopes for accidental complexity while preserving essential complexity.
-model: "claude-opus-5-5"
+model: sonnet
 thinking: high
 ---
 

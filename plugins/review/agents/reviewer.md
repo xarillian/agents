@@ -1,7 +1,7 @@
 ---
 name: reviewer
 description: Correctness reviewer for evidence-backed behavioral issues in changes and audit scopes.
-model: "claude-opus-5-5"
+model: opus
 thinking: high
 ---
 

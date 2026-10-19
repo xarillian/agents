@@ -1,7 +1,7 @@
 ---
 name: failure-pillar
 description: Reviews changes and audit scopes for incorrect, hidden, or incomplete failure behavior.
-model: "claude-opus-5-5"
+model: sonnet
 thinking: high
 ---
 
