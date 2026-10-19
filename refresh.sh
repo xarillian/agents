@@ -6,7 +6,6 @@
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROFILE="technicolor"
 
 prune_repo_links() {
     local destination="$1"
@@ -156,13 +155,11 @@ install_claude_plugins() {
     return 0
 }
 
-if (($#)); then
-    [[ $# == 2 && "$1" == "--profile" ]] || {
-        echo "usage: $0 [--profile technicolor|treetops|kaleidoscope]"
-        exit 1
-    }
-    PROFILE="$2"
-fi
+[[ $# == 2 && "$1" == "--profile" ]] || {
+    echo "usage: $0 --profile technicolor|treetops|kaleidoscope"
+    exit 1
+}
+PROFILE="$2"
 
 [[ "$PROFILE" == "technicolor" || "$PROFILE" == "treetops" || "$PROFILE" == "kaleidoscope" ]] || {
     echo "unknown profile: $PROFILE"

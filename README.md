@@ -12,7 +12,7 @@ cd ~/.agents
 ```
 
 - `refresh.sh --profile <technicolor|treetops|kaleidoscope>` generates content, refreshes symlinks, adds Claude Code marketplaces, and installs missing pi packages and Claude Code plugins
-- `update.sh` manages updates for all bodies
+- `update.sh --profile <technicolor|treetops|kaleidoscope>` manages updates for all bodies
 
 ## Source of Truth
 
