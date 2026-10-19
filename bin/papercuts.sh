@@ -28,11 +28,36 @@ yaml_string() {
   printf '"%s"' "$value"
 }
 
+iso_timestamp() {
+  local offset
+  offset=$(date +%z)
+  printf '%s%s:%s' "$(date +%Y-%m-%dT%H:%M:%S)" "${offset:0:3}" "${offset:3:2}"
+}
+
+acquire_lock() {
+  local requested=$1 attempt
+  for attempt in {1..50}; do
+    if mkdir "$requested" 2>/dev/null; then
+      lock_directory=$requested
+      return 0
+    fi
+    sleep 0.1
+  done
+  fail "timed out waiting for lock; remove it if stale: $requested"
+}
+
+release_lock_and_cleanup() {
+  [[ -n "$temporary_file" ]] && rm -f "$temporary_file"
+  [[ -n "$lock_directory" ]] && rmdir "$lock_directory" 2>/dev/null
+  return 0
+}
+
 model=''
 project=''
 cause=''
 log_file="$HOME/.agents/workflow/PAPERCUTS.yaml"
 temporary_file=''
+lock_directory=''
 
 while getopts ':m:p:c:h' option; do
   case "$option" in
@@ -63,9 +88,13 @@ summary=$1
 [[ "$summary" != *$'\n'* ]] || fail 'the summary must be one line'
 [[ "$cause" != *$'\n'* ]] || fail 'the cause must be one line'
 
-log_file=$(realpath -m "$log_file")
+mkdir -p "$(dirname "$log_file")"
+if [[ -e "$log_file" ]]; then
+  log_file=$(realpath "$log_file")
+else
+  log_file="$(realpath "$(dirname "$log_file")")/$(basename "$log_file")"
+fi
 log_directory=$(dirname "$log_file")
-mkdir -p "$log_directory"
 
 if git_root=$(env -u GIT_DIR -u GIT_WORK_TREE git -C "$log_directory" rev-parse --show-toplevel 2>/dev/null); then
   tracked_path=${log_file#"$git_root"/}
@@ -92,11 +121,8 @@ if [[ -z "$project" ]]; then
   fi
 fi
 
-lock_file="$log_file.lock"
-exec 9>>"$lock_file"
-flock -x 9
-
-trap '[[ -n "$temporary_file" ]] && rm -f "$temporary_file"' EXIT
+trap release_lock_and_cleanup EXIT
+acquire_lock "$log_file.lock"
 temporary_file=$(mktemp "$log_directory/.papercuts.XXXXXX")
 
 if [[ ! -e "$log_file" ]]; then
@@ -111,7 +137,7 @@ else
 fi
 
 {
-  printf '  - occurred_at: %s\n' "$(yaml_string "$(date --iso-8601=seconds)")"
+  printf '  - occurred_at: %s\n' "$(yaml_string "$(iso_timestamp)")"
   printf '    project: %s\n' "$(yaml_string "$project")"
   printf '    model: %s\n' "$(yaml_string "$model")"
   printf '    cwd: %s\n' "$(yaml_string "$PWD")"
