@@ -35,8 +35,8 @@
     },
     "xarillian-agents": {
       "source": {
-        "source": "directory",
-        "path": "/Users/heinrich/.agents"
+        "source": "github",
+        "repo": "xarillian/agents"
       }
     }
   },

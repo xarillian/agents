@@ -129,7 +129,7 @@ install_pi_packages() {
 add_claude_marketplaces() {
     claude plugin marketplace add anthropics/claude-plugins-official
     claude plugin marketplace add openai/codex-plugin-cc
-    claude plugin marketplace add "$REPO"
+    claude plugin marketplace add xarillian/agents
     claude plugin marketplace update "$(jq -r .name "$REPO/.claude-plugin/marketplace.json")"
 
     # TODO: if profile ... treetops ... add marketplace https://gitlab.dev.ncconsulting.ca/consulting/agent-marketplace.git
