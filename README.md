@@ -26,6 +26,5 @@ config/       Harness configuration, split by tool
 packages/     Local Pi extensions
 plugins/      Claude Code plugins
 profiles/     Per-machine or per-context overlays, including profile-only skills
-rules/        Shared operating rules
 skills/       Reusable agent skills
 ```
