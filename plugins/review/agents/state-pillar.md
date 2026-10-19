@@ -1,7 +1,7 @@
 ---
 name: state-pillar
 description: Reviews changes and audit scopes for lifecycle, ordering, concurrency, and repeated-execution defects.
-model: "gpt-5.6-luna"
+model: "claude-opus-5-5"
 thinking: xhigh
 ---
 

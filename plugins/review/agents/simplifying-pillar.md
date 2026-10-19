@@ -1,7 +1,7 @@
 ---
 name: simplifying-pillar
 description: Reviews changes and audit scopes for accidental complexity while preserving essential complexity.
-model: "gpt-5.6-luna"
+model: "claude-opus-5-5"
 thinking: high
 ---
 

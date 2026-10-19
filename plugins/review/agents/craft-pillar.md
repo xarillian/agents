@@ -1,7 +1,7 @@
 ---
 name: craft-pillar
 description: Reviews changes and audit scopes for deliberate construction, clarity, reuse, and project craft standards.
-model: "gpt-5.6-terra"
+model: "claude-opus-5-5"
 thinking: high
 ---
 

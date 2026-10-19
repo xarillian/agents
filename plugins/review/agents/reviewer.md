@@ -1,7 +1,7 @@
 ---
 name: reviewer
 description: Correctness reviewer for evidence-backed behavioral issues in changes and audit scopes.
-model: "gpt-5.6-sol"
+model: "claude-opus-5-5"
 thinking: high
 ---
 
