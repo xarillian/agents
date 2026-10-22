@@ -1,8 +1,8 @@
 ---
 name: reviewer
-description: Correctness reviewer for evidence-backed behavioral issues in changes and audit scopes.
+tools: Read, Grep, Glob, Bash
 model: opus
-thinking: high
+effort: high
 ---
 
 # Purpose

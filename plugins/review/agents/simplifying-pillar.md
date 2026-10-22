@@ -1,8 +1,8 @@
 ---
 name: simplifying-pillar
-description: Reviews changes and audit scopes for accidental complexity while preserving essential complexity.
+tools: Read, Grep, Glob, Bash
 model: sonnet
-thinking: high
+effort: high
 ---
 
 # Purpose

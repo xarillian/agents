@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "review",
   "description": "Review code with focused, evidence-based subagents.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": {
     "name": "Austin Wayne"
   }

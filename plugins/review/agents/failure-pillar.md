@@ -1,8 +1,8 @@
 ---
 name: failure-pillar
-description: Reviews changes and audit scopes for incorrect, hidden, or incomplete failure behavior.
+tools: Read, Grep, Glob, Bash
 model: sonnet
-thinking: high
+effort: high
 ---
 
 # Purpose

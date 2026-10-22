@@ -1,8 +1,8 @@
 ---
 name: state-pillar
-description: Reviews changes and audit scopes for lifecycle, ordering, concurrency, and repeated-execution defects.
+tools: Read, Grep, Glob, Bash
 model: sonnet
-thinking: xhigh
+effort: xhigh
 ---
 
 # Purpose

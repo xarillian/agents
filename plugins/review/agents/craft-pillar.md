@@ -1,8 +1,8 @@
 ---
 name: craft-pillar
-description: Reviews changes and audit scopes for deliberate construction, clarity, reuse, and project craft standards.
+tools: Read, Grep, Glob, Bash
 model: sonnet
-thinking: high
+effort: high
 ---
 
 # Purpose

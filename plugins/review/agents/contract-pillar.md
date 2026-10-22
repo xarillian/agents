@@ -1,8 +1,8 @@
 ---
 name: contract-pillar
-description: Reviews changes and audit scopes for broken contracts, invariants, callers, integrations, and cutovers.
+tools: Read, Grep, Glob, Bash
 model: sonnet
-thinking: xhigh
+effort: xhigh
 ---
 
 # Purpose
