@@ -56,6 +56,11 @@ model=''
 project=''
 cause=''
 log_file="$HOME/.agents/workflow/PAPERCUTS.yaml"
+# `yq` is kislyuk's jq wrapper under pacman and mikefarah's Go rewrite under
+# Homebrew. They name an array's type differently, and mikefarah binds `|`
+# tighter than `and`/`or`, hence the extra parentheses.
+papercuts_log_shape='(.version == 1) and (.papercuts | (type == "array" or type == "!!seq"))'
+papercuts_have_fields='([.papercuts[] | (has("occurred_at") and has("project") and has("model") and has("cwd") and has("summary") and has("suspected_cause"))] | all)'
 temporary_file=''
 lock_directory=''
 
@@ -127,9 +132,9 @@ temporary_file=$(mktemp "$log_directory/.papercuts.XXXXXX")
 
 if [[ ! -e "$log_file" ]]; then
   printf 'version: 1\npapercuts:\n' >"$temporary_file"
-elif ! yq -e '(.version == 1) and (.papercuts | type == "array")' "$log_file" >/dev/null; then
+elif ! yq -e "$papercuts_log_shape" "$log_file" >/dev/null; then
   fail "invalid papercuts log: $log_file"
-elif yq -e '(.papercuts | length) == 0' "$log_file" >/dev/null; then
+elif [[ $(yq '.papercuts | length' "$log_file") == 0 ]]; then
   printf 'version: 1\npapercuts:\n' >"$temporary_file"
 else
   cp "$log_file" "$temporary_file"
@@ -149,7 +154,7 @@ fi
   fi
 } >>"$temporary_file"
 
-yq -e '(.version == 1) and (.papercuts | type == "array") and all(.papercuts[]; has("occurred_at") and has("project") and has("model") and has("cwd") and has("summary") and has("suspected_cause"))' "$temporary_file" >/dev/null || fail "refusing to write invalid papercuts log: $log_file"
+yq -e "$papercuts_log_shape and $papercuts_have_fields" "$temporary_file" >/dev/null || fail "refusing to write invalid papercuts log: $log_file"
 
 mv "$temporary_file" "$log_file"
 temporary_file=''
