@@ -9,5 +9,6 @@ Report, per slide:
 5. Claims stated as fact that look inferred.
 6. Mechanisms you couldn't follow without a pseudocode panel or a trace, and panels or callouts that told you nothing new.
 7. Choices you could not argue against after reading the deck. That usually means a weakness is missing.
+8. Slides you could not take in at a glance. Detail you want added belongs in the speaker notes.
 
 Quote the slide text you're reporting on. Don't suggest rewrites; report what a reader would trip on. Suggest stylistic improvements. We want to make things gorgeous and easily digestible.

@@ -9,7 +9,7 @@ Build a slide deck to build shared context around a conversation, decision recor
 # Explainer
 Goal: To build a slide deck that is easily digestible asynchronously.
 
-Loop: Earn the conclusion from evidence, outline it as titles, write one idea per slide, show the hard parts (interlaced), then review it as a critical stranger would. Every claim on a slide needs to be measured, read in a source, or labelled as inference.
+Loop: Earn the conclusion from evidence, outline it as titles, write one idea per slide, show the hard parts (interlaced), then review it as a critical stranger would. Every claim on a slide needs to be measured, read in a source, or labelled as inference. 
 
 ## Begin
 Open a todolist with one entry per phase before writing anything.
@@ -27,7 +27,7 @@ Skip "Measure" when no claim is comparative.
 1. Read the code under discussion until you can say how it behaves and why it is shaped that way. Note the exact vocabulary used; we should _only_ utilize that vocabulary, except comparatively, e.g. "an egregore, called elsewhere a tulpa, is...".
 2. Read the user's plans and roadmap, as well as agentic sessions for the project. Weaknesses come from here, not from generic concerns.
 3. Establish competing patterns or architecture. Build these in your scratchpad. Merged MRs/PRs often say why a design has changed, so also view GitHub or GitLab.
-4. Tag every note as **measured**, **read in source**, or **inferred**. Keep a list of every source. The tag follows the claim on its slide, and the source should go in the footer.
+4. Tag every note as **measured**, **read in source**, or **inferred**. Keep a list of every source. The tag and source follow the claim into its slide's speaker notes.
 
 Teaching one source instead of a decision? Read until you could teach it to someone new: README and docs, then entry points and the files that show how the parts fit. If no source is given or it is undiscoverable, ask for one.
 
@@ -51,7 +51,7 @@ A teaching deck builds bottom up. Start from what the reader surely knows, add o
 
 ## Phase D: Write
 
-1. Give each slide an eyebrow, a title, one takeaway sentence, and one structure (cards, table, chart, code, or animation). Two structures compete for the eye and neither lands.
+1. Give each slide a title, one takeaway sentence, and one structure (cards, table, chart, code, or animation). Two structures compete for the eye and neither lands. A reader should take a slide in at a glance; what doesn't fit goes in its speaker notes.
 2. Define each term before it is used. Use the code's word for it (`rg -o -i` the candidates, pick the most frequent) and its variant names (Completion, not "completed"). Mark terms the code lacks as "(new)". A proposal that contradicts the code's semantics is a correction, not a name to keep.
 3. Give every number a unit, a direction, a range, and its run. Label inferences on the slide ("likely", "not yet measured").
 4. Show the hard parts.
@@ -74,7 +74,7 @@ Spawn a critical readonly subagent with `references/cold-reader-prompt.md`. Modi
 
 While it reads, check the rest yourself simultaneously:
 
-1. Every fact, number, caveat, and source from the previous version survives.
+1. Every fact, number, caveat, and source from the previous version survives, on a slide or in its speaker notes.
 2. Simplify wording, but NOT content.
 3. Fix typos and awkward grammar.
 4. Every inference is labelled, and everything unmeasured is discussed as so.
@@ -82,6 +82,8 @@ While it reads, check the rest yourself simultaneously:
 6. Write slide text through the `unslop` skill.
 
 Fix what the cold reader flags, then publish only the changed slides.
+
+You, then, should do a final passover. Make sure no slide is too information dense: the ultimate presentation is informative AND easily digestible. Ensure it is that way.
 
 ## Outputs
 
