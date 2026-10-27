@@ -2,6 +2,8 @@
 name: papercuts
 description: >-
   Interrupt work and use when friction occurs: a tool call fails, a command is flaky, a documented tool is missing, or a setup step is confusing. Invoke this even if you have a workaround. The skill decides whether the friction is worth recording.
+metadata:
+  status: solid
 ---
 
 # Papercuts

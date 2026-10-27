@@ -2,6 +2,8 @@
 name: ambition
 description: Use when a deeper version of a task must be discovered.
 disable-model-invocation: true
+metadata:
+  status: in-trial
 ---
 
 I want a deeper version of this task, not a bigger one. You are to re-write the task into a more ambitious one.

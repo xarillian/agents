@@ -11,4 +11,4 @@ Report, per slide:
 7. Choices you could not argue against after reading the deck. That usually means a weakness is missing.
 8. Slides you could not take in at a glance. Detail you want added belongs in the speaker notes.
 
-Quote the slide text you're reporting on. Don't suggest rewrites; report what a reader would trip on. Suggest stylistic improvements. We want to make things gorgeous and easily digestible.
+Quote the slide text you're reporting on. Don't suggest rewrites; report what a reader would trip on. Suggest stylistic improvements. We want to make these things gorgeous and easily digestible.

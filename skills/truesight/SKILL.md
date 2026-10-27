@@ -1,7 +1,9 @@
 ---
 name: truesight
 description: 
-  Use when about to act on a file, error, request, or situation you recognize the "truth of", i.e. before editing code you've skimmed, fixing an error you've seen before, or implementing a request you've pattern-matched to a familiar template. Guards against acting on the prior instead of the artifact. 
+  Use when about to act on a file, error, request, or situation you recognize the "truth of", i.e. before editing code you've skimmed, fixing an error you've seen before, or implementing a request you've pattern-matched to a familiar template. Guards against acting on the prior instead of the artifact.
+metadata:
+  status: solid
 ---
 
 # Truesight
