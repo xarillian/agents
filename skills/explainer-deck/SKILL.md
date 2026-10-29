@@ -52,12 +52,12 @@ A decision deck might need vocabulary, how others are doing it, options tried, e
 A teaching deck builds bottom up. Start from what the reader surely knows, add one idea per slide, and work a real example before naming the rule. Six to fourteen steps, closing with the sources.
 
 ## Phase D: Write
-1. Give each slide a title, one takeaway sentence, and one structure (cards, table, chart, code, or animation). Two structures compete for the eye and neither lands. A reader should take a slide in at a glance; what doesn't fit goes in its speaker notes.
+1. Give each slide a title, one takeaway sentence, and one structure (cards, table, chart, pseudocode, or animation). Two structures compete for the eye and neither lands. A reader should take a slide in at a glance; what doesn't fit goes in its speaker notes.
 2. Pin one source line at the foot of each content slide: the file, ADR, or command and date the slide stands on. If its sources won't fit on one line, the slide makes too many claims; split it.
-3. Define each term before it is used. Use the code's word for it (`rg -o -i` the candidates, pick the most frequent) and its variant names (Completion, not "completed"). Terms the code lacks go in the glossary as new. Spell out shorthand, keeping the code's term in brackets. A proposal that contradicts the code's semantics is a correction, not a name to keep.
+3. Define each term before it is used. Use the code's word for it (`rg -o -i` the candidates, pick the most frequent) and its variant names (Completion, not "completed"). Terms the code lacks go in the glossary as new. Spell out shorthand, keeping the code's term in brackets. A proposal that contradicts the code's semantics is a correction, not a name to keep. Set identifiers (agents, packages, paths, functions) as code, in monospace: `agent_evals`, `evals/`.
 4. Give every number a unit, a direction, a range, and its run. Say statistics in plain words: p99 is "the slowest 1 in 100", p50 is "the median". Label inferences on the slide ("likely", "not yet measured").
 5. Show the hard parts.
-    - Pseudocode. A dense mechanism gets a pseudocode panel, labelled "Pseudocode". ALL code should be written as pseudocode unless the construction is language-specific.
+    - Pseudocode. A dense mechanism gets a pseudocode panel, labelled "Pseudocode". Every code panel on every slide is pseudocode, API examples included. The only exception is a slide whose point is a feature of the language itself.
     - Traces. Surprising behaviour gets a trace on real values, with the divergent row highlighted and the proving test named. An easy-to-miss hazard gets a tagged callout (Race condition, Ordering, Lifetime, Breaking, Unmeasured) and one sentence saying what goes wrong and when.
     - About one callout per section. More and the reader stops seeing them.
 6. Give strengths and weaknesses their own slides when the reader must weigh a choice. Each strength cites its proof. Each weakness comes from the user's plans and ends with a mitigation or "open". Use the same layout for both. A deck with only strengths is an advert.
