@@ -107,6 +107,7 @@
   },
   "promptSuggestionEnabled": false,
   "awaySummaryEnabled": true,
+  "showThinkingSummaries": true,
   "pluginConfigs": {
     "agents-md@builtin": {
       "options": {
