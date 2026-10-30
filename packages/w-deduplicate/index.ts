@@ -5,9 +5,6 @@ export type ContextFile = {
 	content: string;
 };
 
-const contextBlock = ({ path, content }: ContextFile) =>
-	`<project_instructions path="${path}">\n${content}\n</project_instructions>\n\n`;
-
 export function findDuplicateContextFiles(contextFiles: ContextFile[] = []): Set<string> {
 	const seenContent = new Set<string>();
 	const duplicatePaths = new Set<string>();
@@ -20,18 +17,14 @@ export function findDuplicateContextFiles(contextFiles: ContextFile[] = []): Set
 	return duplicatePaths;
 }
 
-export function removeDuplicateContext(prompt: string, contextFiles: ContextFile[] = []): string {
+export function removeDuplicateContext(contextFiles: ContextFile[] = []): ContextFile[] {
 	const duplicatePaths = findDuplicateContextFiles(contextFiles);
 
-	for (const file of contextFiles) {
-		if (duplicatePaths.has(file.path)) prompt = prompt.replace(contextBlock(file), "");
-	}
-
-	return prompt;
+	return contextFiles.filter((file) => !duplicatePaths.has(file.path));
 }
 
 export default function (pi: ExtensionAPI) {
-	pi.on("before_agent_start", (event) => ({
-		systemPrompt: removeDuplicateContext(event.systemPrompt, event.systemPromptOptions.contextFiles),
-	}));
+	pi.on("before_agent_start", ({ systemPromptOptions }) => {
+		systemPromptOptions.contextFiles = removeDuplicateContext(systemPromptOptions.contextFiles);
+	});
 }
