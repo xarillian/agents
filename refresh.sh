@@ -98,6 +98,11 @@ link_profile_skills() {
     return 0
 }
 
+# Frontmatter versions the source; harnesses would load it as instructions.
+strip_frontmatter() {
+    awk 'NR == 1 && /^---$/ { front = 1; next } front && /^---$/ { front = 0; next } !front' "$1"
+}
+
 require_command() {
     command -v "$1" >/dev/null || {
         echo "$1 is not installed; run setup.sh first" >&2
@@ -181,8 +186,9 @@ require_command pi
 require_command claude
 require_command jq
 
-sed '/^# User Context$/,$d' "$REPO/AGENTS.base.md" > "$REPO/AGENTS.md"
-cat "$REPO/profiles/$PROFILE/user-context.md" >> "$REPO/AGENTS.md"
+strip_frontmatter "$REPO/AGENTS.base.md" > "$REPO/AGENTS.md"
+rm -f "$REPO/user-context.md"
+ln -s "$REPO/profiles/$PROFILE/user-context.md" "$REPO/user-context.md"
 
 link_config_tree "$REPO/config/pi" "$HOME/.pi" .json
 mkdir -p ~/.pi/agent/packages

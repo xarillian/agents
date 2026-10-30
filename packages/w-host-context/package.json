@@ -1,0 +1,16 @@
+{
+  "name": "w-host-context",
+  "description": "Resolves Claude Code-style `@path` import lines in Pi context files.",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/host-context.test.ts"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*"
+  },
+  "pi": {
+    "extensions": ["./index.ts"]
+  }
+}

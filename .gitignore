@@ -17,6 +17,7 @@ models-store.json
 # Perhaps not a scalable pattern
 # `pi` reads from `~/.agents/skills`
 /AGENTS.md
+/user-context.md
 /skills/workstation
 /skills/spinning-up-an-hsms-database
 /skills/developing-on-kaleidoscope

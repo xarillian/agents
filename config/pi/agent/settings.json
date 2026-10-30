@@ -25,6 +25,9 @@
       "source": "./packages/w-startup"
     },
     {
+      "source": "./packages/w-host-context"
+    },
+    {
       "source": "./packages/w-deduplicate"
     },
     {
