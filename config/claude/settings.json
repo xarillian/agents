@@ -69,7 +69,7 @@
     }
   },
   "promptSuggestionEnabled": false,
-  "awaySummaryEnabled": false,
+  "awaySummaryEnabled": true,
   "pluginConfigs": {
     "agents-md@builtin": {
       "options": {
@@ -81,5 +81,42 @@
   "autoMemoryEnabled": false,
   "theme": "dark-daltonized",
   "switchModelsOnFlag": false,
-  "agentPushNotifEnabled": true
+  "agentPushNotifEnabled": true,
+  "permissions": {
+    "allow": [
+      "Bash(bq show *)",
+      "Bash(defaults read *)",
+      "Bash(docker compose config *)",
+      "Bash(docker compose logs *)",
+      "Bash(docker compose ps *)",
+      "Bash(docker compose ps)",
+      "Bash(gcloud logging read *)",
+      "Bash(gcloud run revisions describe *)",
+      "Bash(gcloud run revisions list *)",
+      "Bash(gcloud run services describe *)",
+      "Bash(gcloud run services list *)",
+      "Bash(git fetch *)",
+      "Bash(git fetch)",
+      "Bash(glab mr list *)",
+      "Bash(glab mr view *)",
+      "Bash(hc read *)",
+      "Bash(hc wait *)",
+      "Bash(herdr-app commands*)",
+      "Bash(herdr-app ls*)",
+      "mcp__claude_ai_Atlassian__getTransitionsForJiraIssue",
+      "mcp__plugin_andgo-company_atlassian__getAccessibleAtlassianResources",
+      "mcp__plugin_andgo-company_atlassian__getConfluenceContent",
+      "mcp__plugin_andgo-company_atlassian__getJiraIssue",
+      "mcp__plugin_andgo-company_atlassian__searchJiraIssuesUsingJql",
+      "mcp__plugin_andgo-company_gitlab__get_job",
+      "mcp__plugin_andgo-company_gitlab__get_merge_request",
+      "mcp__plugin_andgo-company_gitlab__get_pipeline",
+      "mcp__plugin_andgo-company_gitlab__get_repository_file",
+      "mcp__plugin_andgo-company_gitlab__get_user",
+      "mcp__plugin_andgo-company_gitlab__list_commits",
+      "mcp__plugin_andgo-company_gitlab__list_merge_requests",
+      "mcp__plugin_andgo-company_gitlab__list_repository_tree",
+      "mcp__plugin_andgo-company_slack__slack_search_public_and_private"
+    ]
+  }
 }
