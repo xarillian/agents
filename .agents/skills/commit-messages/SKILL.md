@@ -10,6 +10,8 @@ description: Use when writing a commit message in this repository.
 - **Body only when the why is not obvious.** Prose, no bullets, wrapped at 72. Say what was broken or misleading and for whom; the diff already says what changed.
 - **No trailers.** No co-author or attribution lines.
 
+## Example
+
 ```
 Invoke papercuts even with a workaround in hand
 
