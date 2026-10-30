@@ -47,9 +47,6 @@
     },
     {
       "source": "./packages/w-compaction"
-    },
-    {
-      "source": "./packages/w-diviner"
     }
   ],
   "enableSkillCommands": false,
