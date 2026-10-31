@@ -45,6 +45,15 @@
       "mcp__plugin_andgo-company_slack__slack_search_public_and_private"
     ]
   },
+  "hooks": {
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          { "type": "command", "command": "\"$HOME/.agents/config/claude/hooks/papercuts-nudge.sh\"" }
+        ]
+      }
+    ]
+  },
   "bashEditDiffEnabled": false,
   "enabledPlugins": {
     "clangd-lsp@claude-plugins-official": true,
