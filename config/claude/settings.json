@@ -46,6 +46,21 @@
     ]
   },
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Skill",
+        "hooks": [
+          { "type": "command", "command": "\"$HOME/.agents/bin/log-skill-use.sh\"" }
+        ]
+      }
+    ],
+    "UserPromptExpansion": [
+      {
+        "hooks": [
+          { "type": "command", "command": "\"$HOME/.agents/bin/log-skill-use.sh\"" }
+        ]
+      }
+    ],
     "PostToolUseFailure": [
       {
         "hooks": [
