@@ -49,7 +49,7 @@
     "PostToolUseFailure": [
       {
         "hooks": [
-          { "type": "command", "command": "\"$HOME/.agents/config/claude/hooks/papercuts-nudge.sh\"" }
+          { "type": "command", "command": "\"$HOME/.agents/bin/papercuts-nudge.sh\"" }
         ]
       }
     ]
