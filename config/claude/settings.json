@@ -91,7 +91,8 @@
     "frontend-design@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
     "employee-need-shift-splash@andgo-plugins": true,
-    "swift-lsp@claude-plugins-official": true
+    "swift-lsp@claude-plugins-official": true,
+    "playground@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
