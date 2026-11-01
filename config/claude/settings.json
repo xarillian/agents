@@ -50,21 +50,30 @@
       {
         "matcher": "Skill",
         "hooks": [
-          { "type": "command", "command": "\"$HOME/.agents/bin/log-skill-use.sh\"" }
+          {
+            "type": "command",
+            "command": "\"$HOME/.agents/bin/log-skill-use.sh\""
+          }
         ]
       }
     ],
     "UserPromptExpansion": [
       {
         "hooks": [
-          { "type": "command", "command": "\"$HOME/.agents/bin/log-skill-use.sh\"" }
+          {
+            "type": "command",
+            "command": "\"$HOME/.agents/bin/log-skill-use.sh\""
+          }
         ]
       }
     ],
     "PostToolUseFailure": [
       {
         "hooks": [
-          { "type": "command", "command": "\"$HOME/.agents/bin/papercuts-nudge.sh\"" }
+          {
+            "type": "command",
+            "command": "\"$HOME/.agents/bin/papercuts-nudge.sh\""
+          }
         ]
       }
     ]
@@ -131,7 +140,6 @@
   },
   "promptSuggestionEnabled": false,
   "awaySummaryEnabled": true,
-  "showThinkingSummaries": true,
   "pluginConfigs": {
     "agents-md@builtin": {
       "options": {
@@ -141,6 +149,7 @@
   },
   "tui": "fullscreen",
   "autoMemoryEnabled": false,
+  "showThinkingSummaries": true,
   "theme": "dark-daltonized",
   "switchModelsOnFlag": false,
   "agentPushNotifEnabled": true
