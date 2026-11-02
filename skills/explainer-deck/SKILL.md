@@ -49,11 +49,11 @@ Every deck opens with a glossary slide, "Words used here", right after the cover
 
 A decision deck might need vocabulary, how others are doing it, options tried, etc. Fit your slides to the storytelling and drop what evidence can't fill.
 
-A teaching deck builds bottom up. Start from what the reader surely knows, add one idea per slide, and work a real example before naming the rule. Six to fourteen steps, closing with the sources.
+A teaching deck builds bottom up. Start from what the reader surely knows, add one idea per slide, and work a real example before naming the rule. Four to fourteen steps.
 
 ## Phase D: Write
 1. Give each slide a title, one takeaway sentence, and one structure (cards, table, chart, pseudocode, or animation). Two structures compete for the eye and neither lands. A reader should take a slide in at a glance; what doesn't fit goes in its speaker notes.
-2. Pin one source line at the foot of each content slide: the file, ADR, or command and date the slide stands on. If its sources won't fit on one line, the slide makes too many claims; split it.
+2. Pin one source line at the foot (subscript) of each content slide: the file, ADR, or command and date the slide stands on. If its sources won't fit on one line, the slide makes too many claims; split it.
 3. Define each term before it is used. Use the code's word for it (`rg -o -i` the candidates, pick the most frequent) and its variant names (Completion, not "completed"). Terms the code lacks go in the glossary as new. Spell out shorthand, keeping the code's term in brackets. A proposal that contradicts the code's semantics is a correction, not a name to keep. Set identifiers (agents, packages, paths, functions) as code, in monospace: `agent_evals`, `evals/`.
 4. Give every number a unit, a direction, a range, and its run. Say statistics in plain words: p99 is "the slowest 1 in 100", p50 is "the median". Label inferences on the slide ("likely", "not yet measured").
 5. Show the hard parts.
@@ -75,7 +75,7 @@ Flourish:
 - Have a fun and relevant animation on the cover slide.
 - Promote one of its actors to mascot in the following slides. It rides a rail along the bottom of each slide to mark the reader's place, and it finishes its own story on the closing slide.
 
-IMPORTANT: The slide deck should be proportional to the amount of change or level of detail required. NEVER more than 14 slides. A change of 300 lines could very reasonably be a deck of 4 or 5 slides. If a deck is too long, it is not digestible.
+IMPORTANT: The slide deck should be proportional to the amount of change or level of detail required. NEVER more than 16 slides. A change of 300 lines could very reasonably be a deck of 4 or 5 slides. If a deck is too long, it is not digestible.
 
 ## Phase F: Review
 Spawn a critical readonly subagent with `references/cold-reader-prompt.md`. Modify the prompt as an operator and adapt the prompt to the deck as needed.
@@ -93,4 +93,4 @@ Fix what the cold reader flags, then publish only the changed slides.
 You, then, should do a final passover. Make sure no slide is too information dense: the ultimate presentation is informative AND easily digestible. Ensure it is that way.
 
 ## Outputs
-The deck's link, private. A list of what's not verified. On a revision, one line per changed slide.
+The deck's link, at the highest publicity level available (private, org-wide, or public). A list of what's not verified. On a revision, one line per changed slide.
