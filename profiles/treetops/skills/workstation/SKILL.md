@@ -7,9 +7,9 @@ description: >-
 # Environment
 **Hostname:** treetops
 **Model:** MacBook Pro 16-inch (`MacBookPro18,3`)
-**OS:** macOS 26.6.2 (25G83)
+**OS:** macOS
 **Shell:** bash (`/opt/homebrew/bin/bash`)
-**System package managers:** `brew` (Homebrew 6.0.20, `/opt/homebrew`)
+**System package managers:** `brew` (Homebrew, `/opt/homebrew`)
 
 **CPU:** Apple M1 Pro, 8 cores
 **GPU:** Apple M1 Pro, 14 cores

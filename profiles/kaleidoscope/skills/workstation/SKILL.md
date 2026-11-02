@@ -8,7 +8,7 @@ description: >-
 
 **Hostname:** kaleidoscope
 **Model:** MacBook Pro 16-inch, 2019 (`MacBookPro16,1`, Intel x86_64)
-**OS:** macOS 26.7.1 (25G241)
+**OS:** macOS
 **Shell:** bash 5 (`/opt/local/bin/bash`, MacPorts)
 **System package managers:** MacPorts (`port`, `/opt/local`, root-owned). No Homebrew.
 

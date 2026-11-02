@@ -7,17 +7,20 @@ description: >-
 # Environment
 **Hostname:** TECHNICOLOR
 **OS:** Arch Linux (btw)
+**Bootloader:** GRUB
 **Shell:** bash
 **System package managers:** `pacman`, `yay` (AUR)
 
 **CPU:** Intel i5-12600K
 **GPU:** NVIDIA GeForce RTX 4070 Ti, 12GB (`nvidia-open` drivers)
+**GPU compute:** CUDA at `/opt/cuda` (Arch's location)
 **RAM:** 32GB
 **Motherboard:** ASUS PRIME Z690M
 
 **Compositor:** Hyprland (Wayland), launched through `uwsm`
 **Display Manager:** SDDM
 **XDG_CURRENT_DESKTOP:** Hyprland:KDE
+**Terminal:** kitty
 
 **Current Keyboard:** Keychron Q1 HE Aluminum 75%
 
