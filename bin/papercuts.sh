@@ -5,7 +5,7 @@ usage() {
   cat <<'EOF'
 Usage: papercuts.sh -m MODEL [-p PROJECT] [-c CAUSE] SUMMARY
 
-Submit one papercut to ~/.agents/workflow/PAPERCUTS.yaml.
+Submit one papercut to ~/.agents/insights/PAPERCUTS.yaml.
 
   -m MODEL    Exact active model identifier (required)
   -p PROJECT  Project name; defaults to the containing Git repository
@@ -55,7 +55,7 @@ release_lock_and_cleanup() {
 model=''
 project=''
 cause=''
-log_file="$HOME/.agents/workflow/PAPERCUTS.yaml"
+log_file="$HOME/.agents/insights/PAPERCUTS.yaml"
 # `yq` is kislyuk's jq wrapper under pacman and mikefarah's Go rewrite under
 # Homebrew. They name an array's type differently, and mikefarah binds `|`
 # tighter than `and`/`or`, hence the extra parentheses.

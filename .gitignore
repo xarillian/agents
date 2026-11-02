@@ -1,5 +1,5 @@
 # Secret, gitignored for reasons of paranoia
-workflow/
+insights/
 auth.json
 .credentials.json
 credentials.json

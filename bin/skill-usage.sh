@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# Summarise skill-usage.jsonl: how often each skill fires, and which of our
-# own skills never have.
+# Summarise our skills' usage across every profile: how often each fires,
+# when it last did, and which have never fired.
 set -euo pipefail
+shopt -s nullglob
 
-log="$HOME/.agents/workflow/skill-usage.jsonl"
+logs=("$HOME/.agents/usage"/*.jsonl)
 skills="$HOME/.agents/skills"
 
 invocation_counts() {
@@ -11,25 +12,26 @@ invocation_counts() {
     group_by(.skill)
     | map({skill: .[0].skill,
            model: map(select(.invoked_by == "model")) | length,
-           user: map(select(.invoked_by == "user")) | length})
+           user: map(select(.invoked_by == "user")) | length,
+           last: map(.occurred_at) | max | .[:10]})
     | sort_by(-(.model + .user), .skill)[]
-    | [.model, .user, .skill] | @tsv' "$log"
+    | [.model, .user, .last, .skill] | @tsv' "${logs[@]}"
 }
 
 never_invoked() {
   local invoked skill name
-  invoked=$(jq -r '.skill' "$log" | sort -u)
+  invoked=$(jq -r '.skill' "${logs[@]}" | sort -u)
   for skill in "$skills"/*/; do
     name=$(basename "$skill")
     grep -qxF "$name" <<<"$invoked" || printf '%s\n' "$name"
   done
 }
 
-if [[ ! -s "$log" ]]; then
-  echo "No skill invocations logged yet: $log"
+if (( ${#logs[@]} == 0 )); then
+  echo "No skill invocations logged yet in $HOME/.agents/usage"
   exit 0
 fi
 
-{ printf 'model\tuser\tskill\n'; invocation_counts; } | column -t -s $'\t'
+{ printf 'model\tuser\tlast used\tskill\n'; invocation_counts; } | column -t -s $'\t'
 printf '\nNever invoked:\n'
 never_invoked | sed 's/^/  /'

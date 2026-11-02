@@ -18,6 +18,7 @@ description: >-
 **Motherboard:** ASUS PRIME Z690M
 
 **Compositor:** Hyprland (Wayland), launched through `uwsm`
+**Hyprland config:** `~/.config/hypr/hyprland.lua` is Lua, so `hyprctl dispatch` takes a Lua expression, for example `hyprctl dispatch 'hl.dsp.dpms({action = "off", monitor = "DP-1"})'`. For other dispatchers, follow the `hl.dsp.*` calls in that file.
 **Display Manager:** SDDM
 **XDG_CURRENT_DESKTOP:** Hyprland:KDE
 **Terminal:** kitty
