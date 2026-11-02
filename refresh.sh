@@ -3,6 +3,13 @@
 # skills into local agent harnesses, and install any packages and
 # plugins they are missing.
 
+# Sourcing would leave `set -euo pipefail` armed in the caller's shell,
+# which then dies on the next failing prompt hook.
+[[ "${BASH_SOURCE[0]}" == "$0" ]] || {
+    echo "refresh.sh must be run, not sourced: ~/.agents/refresh.sh --profile <name>" >&2
+    return 1
+}
+
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
