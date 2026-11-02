@@ -85,6 +85,5 @@ Always include the explainer.
 3. Bring the description and explainer up to the branch's new state.
 4. Draft a reply per thread, citing the commit that answers it. Post only on the user's go-ahead.
 
-
 ## Output
 Link the PR and the Explainer artifact. Ensure the user is happy with both PR and Artifact; ensure they make the artifact public and the PR comes out of draft once they are.
