@@ -52,6 +52,9 @@ Tautological tests are considered harmful. Tests should be written so effects im
 
 Do what, other than you or me, would show the result is right; that is the bar for done. Exercise changed behaviour before reporting it done: run the failing path for a bug, drive the interface for a UI change, run the command for a CLI change. State exactly what you verified and label inferences as inferences. Report unfinished work as unfinished. Never cover a gap with invented behaviour, stubs, placeholders, or no-op fallbacks; finish everything reachable, then name the exact missing piece.
 
+## Other
+- Strong prefer new commits to editing git history. Do not go back and amend commits or change history unless specficially asked.
+
 # Environment
 - Agent setup lives at `~/.agents`.
 - Time zone: `America/Regina`.
