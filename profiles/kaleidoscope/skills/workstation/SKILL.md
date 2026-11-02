@@ -16,6 +16,11 @@ description: >-
 **GPU:** AMD Radeon Pro 5300M, 4GB; Intel UHD Graphics 630 (integrated)
 **RAM:** 16GB
 **Display:** Built-in Retina, 3072 x 1920
+**Storage:** 500GB internal SSD; FileVault off
+
+**Power:** configured to not sleep. AlDente will keep the battery at 80%; on battery, a launch daemon shuts the host down cleanly at 15%.
+**Graphics:** integrated GPU only (`gpuswitch 0`); the Radeon hung the machine in October 2026. An external display wakes it regardless, since the ports are wired to it.
+**Container VM:** Colima (`vz`), 4 CPUs, 6GB RAM, 100GB disk, no GPU.
 
 **Terminal:** kitty
 
