@@ -1,8 +1,6 @@
 #!/bin/sh
-# Warns at session start when this machine's agent setup has drifted from the
-# repo, either because it hasn't pulled new commits or because someone edited
-# AGENTS.base.md after refresh.sh generated AGENTS.md. It prints nothing
-# otherwise, since you stop reading a warning that appears every session.
+# Warns at session start when this machine's .agent dir or AGENTS.base.md
+# is out of sync with remote or needs to be refreshed.
 repo="$HOME/.agents"
 warnings=""
 
