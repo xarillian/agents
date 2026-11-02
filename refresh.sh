@@ -187,8 +187,8 @@ require_command claude
 require_command jq
 
 strip_frontmatter "$REPO/AGENTS.base.md" > "$REPO/AGENTS.md"
-rm -f "$REPO/user-context.md"
-ln -s "$REPO/profiles/$PROFILE/user-context.md" "$REPO/user-context.md"
+rm -f "$REPO/host-context.md"
+ln -s "$REPO/profiles/$PROFILE/host-context.md" "$REPO/host-context.md"
 
 link_config_tree "$REPO/config/pi" "$HOME/.pi" .json
 mkdir -p ~/.pi/agent/packages
