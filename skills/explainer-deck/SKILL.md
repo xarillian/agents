@@ -75,6 +75,8 @@ Flourish:
 - Have a fun and relevant animation on the cover slide.
 - Promote one of its actors to mascot in the following slides. It rides a rail along the bottom of each slide to mark the reader's place, and it finishes its own story on the closing slide.
 
+IMPORTANT: The slide deck should be proportional to the amount of change or level of detail required. NEVER more than 14 slides. A change of 300 lines could very reasonably be a deck of 4 or 5 slides. If a deck is too long, it is not digestible.
+
 ## Phase F: Review
 Spawn a critical readonly subagent with `references/cold-reader-prompt.md`. Modify the prompt as an operator and adapt the prompt to the deck as needed.
 

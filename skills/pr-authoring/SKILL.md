@@ -12,6 +12,8 @@ Goal: To publish a PR that can easily be read and understood by developers and a
 
 Loop: Review the branch (`/code-review <desired_effort>`). Ensure the changes from code review align with the developer's intention, then push any changes resulting from the review. Open a PR (or, MR) in Draft, write a description that aligns with the diff and records the decision log, and assign the human as assignee.
 
+Updates: A description is a not a decision log nor is an action list. Keep a description concise and focused on helping a reader understand the context and scope of the PR. DO update the explainer artifact. Do NOT use the description as a log. It must remain concise and digestible!
+
 ## Begin
 Open a todolist with one entry per phase.
 
