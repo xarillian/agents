@@ -1,6 +1,6 @@
 ---
 name: pr-authoring
-description: ...
+description: Use when publishing a branch as a PR or MR, writing or rewriting a PR description, or answering review on an open PR. Reviews the branch against the developer's intent, opens the PR, builds an explainer deck, writes the description and revert guidance, and runs the review loop, following the repo's own PR conventions where it has them.
 metadata: 
   status: in-progress
 ---
@@ -8,9 +8,11 @@ metadata:
 Publish a PR/MR.
 
 # PR Authoring
-Goal: To publish a PR that can easily be read and understood by developers and agents.
+Goal: A PR that earns a correct merge decision for the least reviewer attention, and points that attention where judgment is needed.
 
-Loop: Review the branch (`/code-review <desired_effort>`). Ensure the changes from code review align with the developer's intention, then push any changes resulting from the review. Open a PR (or, MR) in Draft, write a description that aligns with the diff and records the decision log, and assign the human as assignee. Where the repo has its own conventions for any of this, follow them (see Repo conventions).
+Readers: Today's reviewer and today's agents (review agents, agents building on the branch). Nobody reads a PR after it merges. Anything a later reader needs belongs in the code, an ADR or the backlog, not the description.
+
+Loop: Review the branch (`/code-review <desired_effort>`). Ensure the changes from code review align with the developer's intention, then push any changes resulting from the review. Open a PR (or, MR) in Draft, write a description that aligns with the diff, and assign the human as assignee. Where the repo has its own conventions for any of this, follow them (see Repo conventions).
 
 Updates: A description is a not a decision log nor is an action list. Keep a description concise and focused on helping a reader understand the context and scope of the PR. DO update the explainer artifact. Do NOT use the description as a log. It must remain concise and digestible!
 
