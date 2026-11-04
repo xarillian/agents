@@ -1,0 +1,13 @@
+{
+  "[markdown][skill][instructions][prompt][chatagent]": {
+    "editor.inlineSuggest.enabled": false,
+    "github.copilot.nextEditSuggestions.enabled": false
+  },
+  "github.copilot.enable": {
+    "markdown": false,
+    "skill": false,
+    "instructions": false,
+    "prompt": false,
+    "chatagent": false
+  }
+}
