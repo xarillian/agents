@@ -1,7 +1,7 @@
 ---
 name: truesight
 description: 
-  Use when about to act on a file, error, request, or situation you recognize the "truth of", i.e. before editing code you've skimmed, fixing an error you've seen before, or implementing a request you've pattern-matched to a familiar template. Guards against acting on the prior instead of the artifact.
+  Use partway through a change, once you have read enough to form a plan and before you carry it out. The moments are just before the first edit, and the instant something you read doesn't fit what you expected, such as a mechanism that already does what was asked, a comment saying the behaviour is deliberate, or a field whose meaning differs from its name. If the fix looks obvious, that is the time. Matters most in codebases too large to read in full, when fixing a reported error or failing check, or when adding a rule, retry, filter, or feature on request. Skip it at the very start of a task; it needs something already read to check the plan against.
 metadata:
   status: solid
 ---
