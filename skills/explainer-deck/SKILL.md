@@ -1,7 +1,7 @@
 ---
 name: explainer-deck
 description: >-
-  Build a slide deck that someone who missed the conversation can follow without a speaker. Use for 'make an explainer', 'make a deck/slides on this', 'walk through this investigation/design/benchmark as slides', or 'teach me this repo/page/topic as slides'.
+  Build a slide deck that someone who has little context can follow without a speaker. Use for 'make an explainer', 'make a deck/slides on this', 'walk through this investigation/design/benchmark as slides', or 'teach me this repo/page/topic as slides'.
 metadata:
   status: in-trial
 ---
