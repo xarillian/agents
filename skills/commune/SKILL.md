@@ -1,5 +1,5 @@
 ---
-name: ambition
+name: commune
 description: Step back from the current work and find a deeper version of it.
 argument-hint: "[a prompt to deepen; leave empty to step back on the current work]"
 disable-model-invocation: true
@@ -10,8 +10,8 @@ metadata:
 I want a deeper version of this task, not a bigger one.
 
 # Target
-- With nothing after `/ambition`, the task is to step back and find a deeper version of the current work. State in one to three sentences what we are actually working on and what it is for. This is to ground the moment.
-- With text after `/ambition`, deepen that text instead. It should be a prompt or task I have not started.
+- With nothing after `/commune`, the task is to step back and find a deeper version of the current work. State in one to three sentences what we are actually working on and what it is for. This is to ground the moment.
+- With text after `/commune`, deepen that text instead. It should be a prompt or task I have not started.
 
 # Considerations
 Write out each of these for the target, before the output. Deep research on the web where it helps.
