@@ -84,7 +84,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$HOME/.agents/bin/papercuts-nudge.sh\""
+            "command": "\"$HOME/.agents/bin/mending-nudge.sh\""
           }
         ]
       }

@@ -3,9 +3,9 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: papercuts.sh -m MODEL [-p PROJECT] [-c CAUSE] SUMMARY
+Usage: mending.sh -m MODEL [-p PROJECT] [-c CAUSE] SUMMARY
 
-Submit one papercut to ~/.agents/insights/PAPERCUTS.yaml.
+Submit one papercut to ~/.agents/insights/MENDING.yaml.
 
   -m MODEL    Exact active model identifier (required)
   -p PROJECT  Project name; defaults to the containing Git repository
@@ -14,7 +14,7 @@ EOF
 }
 
 fail() {
-  printf 'papercuts: %s\n' "$*" >&2
+  printf 'mending: %s\n' "$*" >&2
   exit 1
 }
 
@@ -55,7 +55,7 @@ release_lock_and_cleanup() {
 model=''
 project=''
 cause=''
-log_file="$HOME/.agents/insights/PAPERCUTS.yaml"
+log_file="$HOME/.agents/insights/MENDING.yaml"
 # `yq` is kislyuk's jq wrapper under pacman and mikefarah's Go rewrite under
 # Homebrew. They name an array's type differently, and mikefarah binds `|`
 # tighter than `and`/`or`, hence the extra parentheses.
@@ -128,7 +128,7 @@ fi
 
 trap release_lock_and_cleanup EXIT
 acquire_lock "$log_file.lock"
-temporary_file=$(mktemp "$log_directory/.papercuts.XXXXXX")
+temporary_file=$(mktemp "$log_directory/.mending.XXXXXX")
 
 if [[ ! -e "$log_file" ]]; then
   printf 'version: 1\npapercuts:\n' >"$temporary_file"

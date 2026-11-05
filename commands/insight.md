@@ -8,7 +8,7 @@ Review the signals agents have recorded about this agent setup, then propose fix
 
 ## Read
 
-- `~/.agents/insights/PAPERCUTS.yaml` holds friction agents reported on this machine.
+- `~/.agents/insights/MENDING.yaml` holds friction agents reported on this machine.
 - `~/.agents/bin/skill-usage.sh` prints how often each of my skills fires across every profile, when each last fired, and which never have.
 - `~/.agents/insights/skill-usage.jsonl` is this machine's full log, with `cwd` and `session_id`, for tracing an invocation back to its transcript.
 

@@ -1,12 +1,15 @@
 ---
-name: papercuts
+name: mending
 description: >-
   Interrupt work and use when friction occurs: a tool call fails, a command is flaky, a documented tool is missing, or a setup step is confusing. Invoke this even if you have a workaround. The skill decides whether the friction is worth recording.
 metadata:
   status: solid
 ---
 
-# Papercuts
+# Mending
+## Input
+`/mending audit this` or `/mending heal` means a review of the papercuts log at `~/.agents/insights/MENDING.yaml`, otherwise follow the flow as normal.
+
 ## When to Record
 If you are using this skill, there are two options:
 
@@ -26,14 +29,14 @@ Do not record when:
 
 ## Workflow
 1. Determine if the friction qualifies as a papercut. If it does, continue with this workflow. If it does not, continue with your work.
-2. Submit the papercut through `~/.agents/bin/papercuts.sh`.
+2. Submit the papercut through `~/.agents/bin/mending.sh`.
 
 ## Example Submission
 ```sh
-~/.agents/bin/papercuts.sh -m <active-model-id> "<summary>"
+~/.agents/bin/mending.sh -m <active-model-id> "<summary>"
 ```
 
-- `<active-model-id>` is the concrete current model ID (that's you), e.g. `claude-sonnet-5`
+- `<active-model-id>` is the concrete current model ID (that's you), e.g. `claude-sonnet-5-5`
 - `"summary"` is a 1-2 sentence description of the papercut.
 
 DO NOT check for duplicates. Submit the qualifying papercut and continue.
