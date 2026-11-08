@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "1.0.1",
+  "lastChangelogVersion": "1.5.0",
   "theme": "dark",
   "tuiMode": "fullscreen",
   "quietStartup": true,
@@ -75,5 +75,8 @@
         "disabled": true
       }
     }
+  },
+  "extensionChangelogVersions": {
+    "{\"source\":\"npm:pi-subagents\",\"scope\":\"user\"}": "0.75.0"
   }
 }
