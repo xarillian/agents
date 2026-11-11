@@ -45,6 +45,7 @@
       "mcp__plugin_andgo-company_slack__slack_search_public_and_private"
     ]
   },
+  "model": "opus",
   "hooks": {
     "SessionStart": [
       {
