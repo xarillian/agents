@@ -1,6 +1,7 @@
 ---
 name: pr-authoring
 description: Use when publishing a branch as a PR or MR, writing or rewriting a PR description, or answering review on an open PR. Reviews the branch against the developer's intent, opens the PR, builds an explainer deck, writes the description and revert guidance, and runs the review loop, following the repo's own PR conventions where it has them.
+disable-model-invocation: true
 metadata: 
   status: in-progress
 ---

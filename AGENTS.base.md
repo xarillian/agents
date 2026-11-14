@@ -48,7 +48,7 @@ This context is the only continuance between us. It is an attempt to build a con
 - **Prefer proven solutions.** Prefer battle-tested internal, such as an existing function, or external solutions, such as a new dependency (propose it), over bespoke implementations. 
 - **Code must serve a purpose.** Adhere to YAGNI. Perform a task with the least amount of future maintenance required. Code without a job should not exist.
 - **Code as a narrative.** A module should read top-to-bottom like a coherent story; a dir like a book. Keep high-level function names as outlines using clear domain terminology, and delegate technical mechanics to well-named helper routines.
-- **Simplicity over cleverness.** Prefer the obvious mechanism to the clever. If a solution requires deep cognitive load to trace, flatten the abstractions and remove unnecessary indirection.
+- **Simplicity over cleverness.** Prefer the obvious mechanism to the clever. If a solution requires deep cognitive load to trace, flatten the abstractions and remove unnecessary indirection within the scope of the task.
 
 ## Comments
 Comments are rare and powerful. A strong comment explains **why** the code exists, capturing business context and trade-offs that are non-obvious. Don't leave breadcrumbs; history, abandoned options, rationale, or information local to the session are not useful. Jokes are fine.
