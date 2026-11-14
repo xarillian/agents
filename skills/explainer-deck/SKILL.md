@@ -45,7 +45,7 @@ A number you did not produce is **read in source** until you reproduce it. Rerun
 ## Phase C: Outline
 Write every title before any slide, in one grammar: short topic titles in title case. Read them alone. If they don't tell the story, fix the outline, not the slides.
 
-Every deck opens with a glossary slide, "Words used here", right after the cover. One table: term, meaning, and status (in code, new, or the source it comes from).
+Every deck opens with a glossary slide, titled "Glossary", right after the cover. One table: term, meaning, and status (in code, new, or the source it comes from).
 
 A decision deck might need vocabulary, how others are doing it, options tried, etc. Fit your slides to the storytelling and drop what evidence can't fill.
 
@@ -69,11 +69,27 @@ A teaching deck builds bottom up. Start from what the reader surely knows, add o
     - Give the number to remember its own accent slide: one big figure and what it means. Orange unless the design system offers an accent.
     - Each colour must have one meaning and be colourblind-friendly: add labels.
     - All specific vocabulary must be consistent with one meaning.
-3. Animate mechanisms but not decoration. The slides should be pretty and functional. Loop with a hold on the beginning and end states. Label it so a frame still survives a PDF export. Show the end state under reduced motion.
+3. Animate mechanisms but not decoration. The slides should be pretty and functional. Loop with a hold on the beginning and end states. Never give an animation a caption, tagline or subtitle. An animation that needs one does not explain itself yet: fix the animation. Show the end state under reduced motion.
+4. Draw the shape of the idea. A table or a row of cards is the fallback, not the default. Read the Slides type's `reference/diagrams.md` and `reference/craft.md` first.
+    - A flow with exits is a state diagram: the states in a row, each exit drawn as an arrow to where it leads.
+    - An order of preference is a fallback chain: "none" on the arrow to the next choice, and one bar that every success drops into.
+    - Something that happens over time sits on a time axis with real marks (0 s, 20 s, 40 s).
+    - A condition with two inputs is a two-by-two, with the one cell that matters in the accent colour.
+    - A decision on one input is a fork.
+    - A conversation is a transcript: one bubble style per speaker, the good run beside the bad run.
+    - The accent colour marks the one outcome the slide is about, and nothing else.
+5. Open the published deck and look at every slide before handing it over. Publishing succeeds even when a slide renders broken. Known gotchas of the Slides type:
+    - A `<p>` does not lay out its text as a flex container. To centre text in a sized box, put the `<p>` inside a flex `<div>`.
+    - An element it does not accept hides that part of the slide, and the slide shows "This slide can't be edited right now". `<pre>` is one. Write a pseudocode panel as one `<p>` per line in monospace, indented with `padding-left`.
+    - A negative offset (`top:-44px`) is dropped, so the element lands on top of its neighbour. Make the container taller and place children inside it.
 
 Flourish:
-- Have a fun and relevant animation on the cover slide.
-- Promote one of its actors to mascot in the following slides. It rides a rail along the bottom of each slide to mark the reader's place, and it finishes its own story on the closing slide.
+- Have a fun and relevant animation on the cover slide. It tells the deck's story in miniature, with a cast:
+    - A character, not a marker. Give the subject of the deck (the call, the request, the job) a face and have it act: ring, hop, wait, wake someone. A dot moving along a line is not an animation.
+    - Beats, not motion. The character meets each stage the deck covers, in order, and something happens at each one.
+    - Real values. Speech bubbles and labels carry values from the change itself (the employee number from the test call, the actual prompt), never filler.
+    - Other actors react. The agent answers, the person wakes up. The last beat is the outcome the change exists for.
+- Promote that character to mascot in the following slides. It rides a rail along the bottom of each slide to mark the reader's place, and it finishes its own story on the closing slide.
 
 IMPORTANT: The slide deck should be proportional to the amount of change or level of detail required. NEVER more than 16 slides. A change of 300 lines could very reasonably be a deck of 4 or 5 slides. If a deck is too long, it is not digestible.
 
