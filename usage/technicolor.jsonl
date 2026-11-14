@@ -53,3 +53,5 @@
 {"occurred_at":"2026-11-13T01:57:41-0600","skill":"truesight","invoked_by":"model"}
 {"occurred_at":"2026-11-13T21:48:01-0600","skill":"truesight","invoked_by":"model"}
 {"occurred_at":"2026-11-13T22:01:37-0600","skill":"commune","invoked_by":"model"}
+{"occurred_at":"2026-11-13T23:28:15-0600","skill":"unslop","invoked_by":"user"}
+{"occurred_at":"2026-11-13T23:28:49-0600","skill":"unslop","invoked_by":"user"}
