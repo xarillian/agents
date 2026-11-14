@@ -149,9 +149,14 @@
       "effortLevel": "high"
     },
     "claude-fable-5-1": {
-      "effortLevel": "xhigh"
+      "effortLevel": "xhigh",
+      "autoCompactWindow": 400000
+    },
+    "claude-fable-5-2": {
+      "autoCompactWindow": 400000
     }
   },
+  "idleCompaction": false,
   "promptSuggestionEnabled": false,
   "awaySummaryEnabled": true,
   "pluginConfigs": {
