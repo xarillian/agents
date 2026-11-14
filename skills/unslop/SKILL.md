@@ -32,6 +32,9 @@ Loop: Examine the patterns below. Scan the target text for the patterns, then re
 - **Inline-header lists.** The tell is a bold label and colon that restates the line: "**Performance:** Performance improved...". Convert those to prose. A bold lead-in that ends in a period, names the item, and is followed by genuinely new detail ("**Schema in TypeScript.** Tables live in one file.") is fine, not a tell.
 - **Title case headings.** Use sentence case.
 - **Prose in titles.** Make titles into titles. Don't leak prose into the title.
+  - "Question" not "The question"
+  - "Decisions" not "What only you can decide"
+  - "Review Order" not "Order of the three reviews"
 - **Decorative emojis.** Remove from headings and bullets.
 - **Curly quotes.** Use straight quotes.
 
