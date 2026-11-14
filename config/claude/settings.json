@@ -45,7 +45,7 @@
       "mcp__plugin_andgo-company_slack__slack_search_public_and_private"
     ]
   },
-  "model": "opus",
+  "model": "fable",
   "hooks": {
     "SessionStart": [
       {
@@ -156,7 +156,6 @@
       "autoCompactWindow": 400000
     }
   },
-  "idleCompaction": false,
   "promptSuggestionEnabled": false,
   "awaySummaryEnabled": true,
   "pluginConfigs": {
@@ -170,6 +169,7 @@
   "autoMemoryEnabled": false,
   "showThinkingSummaries": true,
   "theme": "dark-daltonized",
+  "idleCompaction": false,
   "switchModelsOnFlag": false,
   "agentPushNotifEnabled": true
 }
