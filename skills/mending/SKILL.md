@@ -8,7 +8,7 @@ metadata:
 
 # Mending
 ## Input
-`/mending audit this` or `/mending heal` means a review of the papercuts log at `~/.agents/insights/MENDING.yaml`, otherwise follow the flow as normal.
+`/mending audit this` or `/mending heal` means a review of the snag log at `~/.agents/insights/MENDING.yaml`, otherwise follow the flow as normal.
 
 ## When to Record
 If you are using this skill, there are two options:
@@ -24,12 +24,12 @@ Record when:
 
 Do not record when:
 - The friction is not actionable or repeatable.
-- The friction is exceedingly minor, such as a typo, recalled rule, or a mistake corrected before impact. These do not qualify as papercuts.
+- The friction is exceedingly minor, such as a typo, recalled rule, or a mistake corrected before impact. These do not qualify as snags.
 - The friction contains secrets. BE CAREFUL; DO NOT RECORD SECRETS.
 
 ## Workflow
-1. Determine if the friction qualifies as a papercut. If it does, continue with this workflow. If it does not, continue with your work.
-2. Submit the papercut through `~/.agents/bin/mending.sh`.
+1. Determine if the friction qualifies as a snag. If it does, continue with this workflow. If it does not, continue with your work.
+2. Submit the snag through `~/.agents/bin/mending.sh`.
 
 ## Example Submission
 ```sh
@@ -37,6 +37,6 @@ Do not record when:
 ```
 
 - `<active-model-id>` is the concrete current model ID (that's you), e.g. `claude-sonnet-5-5`
-- `"summary"` is a 1-2 sentence description of the papercut.
+- `"summary"` is a 1-2 sentence description of the snag.
 
-DO NOT check for duplicates. Submit the qualifying papercut and continue.
+DO NOT check for duplicates. Submit the qualifying snag and continue.

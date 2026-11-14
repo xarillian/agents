@@ -5,7 +5,7 @@ usage() {
   cat <<'EOF'
 Usage: mending.sh -m MODEL [-p PROJECT] [-c CAUSE] SUMMARY
 
-Submit one papercut to ~/.agents/insights/MENDING.yaml.
+Submit one snag to ~/.agents/insights/MENDING.yaml.
 
   -m MODEL    Exact active model identifier (required)
   -p PROJECT  Project name; defaults to the containing Git repository
@@ -46,6 +46,13 @@ acquire_lock() {
   fail "timed out waiting for lock; remove it if stale: $requested"
 }
 
+upgrade_papercuts_log() {
+  sed -E -e 's/^version: 1$/version: 2/' -e 's/^papercuts:/snags:/' "$log_file" >"$temporary_file"
+  yq -e "$snags_log_shape" "$temporary_file" >/dev/null || fail "could not upgrade the papercuts log: $log_file"
+  mv "$temporary_file" "$log_file"
+  temporary_file=$(mktemp "$log_directory/.mending.XXXXXX")
+}
+
 release_lock_and_cleanup() {
   [[ -n "$temporary_file" ]] && rm -f "$temporary_file"
   [[ -n "$lock_directory" ]] && rmdir "$lock_directory" 2>/dev/null
@@ -59,8 +66,9 @@ log_file="$HOME/.agents/insights/MENDING.yaml"
 # `yq` is kislyuk's jq wrapper under pacman and mikefarah's Go rewrite under
 # Homebrew. They name an array's type differently, and mikefarah binds `|`
 # tighter than `and`/`or`, hence the extra parentheses.
+snags_log_shape='(.version == 2) and (.snags | (type == "array" or type == "!!seq"))'
+snags_have_fields='([.snags[] | (has("occurred_at") and has("project") and has("model") and has("cwd") and has("summary") and has("suspected_cause"))] | all)'
 papercuts_log_shape='(.version == 1) and (.papercuts | (type == "array" or type == "!!seq"))'
-papercuts_have_fields='([.papercuts[] | (has("occurred_at") and has("project") and has("model") and has("cwd") and has("summary") and has("suspected_cause"))] | all)'
 temporary_file=''
 lock_directory=''
 
@@ -130,12 +138,16 @@ trap release_lock_and_cleanup EXIT
 acquire_lock "$log_file.lock"
 temporary_file=$(mktemp "$log_directory/.mending.XXXXXX")
 
+if [[ -e "$log_file" ]] && yq -e "$papercuts_log_shape" "$log_file" >/dev/null 2>&1; then
+  upgrade_papercuts_log
+fi
+
 if [[ ! -e "$log_file" ]]; then
-  printf 'version: 1\npapercuts:\n' >"$temporary_file"
-elif ! yq -e "$papercuts_log_shape" "$log_file" >/dev/null; then
-  fail "invalid papercuts log: $log_file"
-elif [[ $(yq '.papercuts | length' "$log_file") == 0 ]]; then
-  printf 'version: 1\npapercuts:\n' >"$temporary_file"
+  printf 'version: 2\nsnags:\n' >"$temporary_file"
+elif ! yq -e "$snags_log_shape" "$log_file" >/dev/null; then
+  fail "invalid snag log: $log_file"
+elif [[ $(yq '.snags | length' "$log_file") == 0 ]]; then
+  printf 'version: 2\nsnags:\n' >"$temporary_file"
 else
   cp "$log_file" "$temporary_file"
   printf '\n' >>"$temporary_file"
@@ -154,7 +166,7 @@ fi
   fi
 } >>"$temporary_file"
 
-yq -e "$papercuts_log_shape and $papercuts_have_fields" "$temporary_file" >/dev/null || fail "refusing to write invalid papercuts log: $log_file"
+yq -e "$snags_log_shape and $snags_have_fields" "$temporary_file" >/dev/null || fail "refusing to write invalid snag log: $log_file"
 
 mv "$temporary_file" "$log_file"
 temporary_file=''
