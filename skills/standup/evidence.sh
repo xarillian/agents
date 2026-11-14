@@ -110,7 +110,7 @@ authored_commits() {
     me="$(git -C "$repo" -c mailmap.file="$mailmap" check-mailmap "<$email>" | sed -E 's/.*<(.*)>/\1/')"
     git -C "$repo" fetch --quiet --all 2>/dev/null || echo "### ${repo/#"$HOME"/\~}: fetch failed, remote commits may be missing"
     log="$(git -C "$repo" -c mailmap.file="$mailmap" log --use-mailmap --all --source --no-merges --author="$me" \
-        --start_date="$start_date 00:00" --end_date="$end_date 00:00" \
+        --since="$start_date 00:00" --until="$end_date 00:00" \
         --date=format-local:'%m-%d %H:%M' --format='%ad  %h  %S  %s' | sed -E 's#refs/(heads|remotes)/##')"
     [[ -n "$log" ]] || return 0
     echo "### ${repo/#"$HOME"/\~}"
