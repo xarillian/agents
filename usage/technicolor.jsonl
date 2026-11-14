@@ -55,3 +55,13 @@
 {"occurred_at":"2026-11-13T22:01:37-0600","skill":"commune","invoked_by":"model"}
 {"occurred_at":"2026-11-13T23:28:15-0600","skill":"unslop","invoked_by":"user"}
 {"occurred_at":"2026-11-13T23:28:49-0600","skill":"unslop","invoked_by":"user"}
+{"occurred_at":"2026-11-14T01:40:50-0600","skill":"truesight","invoked_by":"model"}
+{"occurred_at":"2026-11-14T01:43:39-0600","skill":"unslop","invoked_by":"model"}
+{"occurred_at":"2026-11-14T01:46:29-0600","skill":"unslop","invoked_by":"user"}
+{"occurred_at":"2026-11-14T02:05:41-0600","skill":"mending","invoked_by":"model"}
+{"occurred_at":"2026-11-14T02:06:09-0600","skill":"mending","invoked_by":"model"}
+{"occurred_at":"2026-11-14T02:22:27-0600","skill":"mending","invoked_by":"model"}
+{"occurred_at":"2026-11-14T02:27:47-0600","skill":"mending","invoked_by":"model"}
+{"occurred_at":"2026-11-14T02:35:49-0600","skill":"mending","invoked_by":"model"}
+{"occurred_at":"2026-11-14T02:36:15-0600","skill":"truesight","invoked_by":"model"}
+{"occurred_at":"2026-11-14T02:45:19-0600","skill":"unslop","invoked_by":"model"}
