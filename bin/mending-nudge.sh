@@ -1,5 +1,10 @@
 #!/bin/sh
-# Agents will try to work around failures without logging them. Log them!
+# Force immediate evaluation before allowing any retry or workaround.
 cat <<'EOF'
-{"hookSpecificOutput":{"hookEventName":"PostToolUseFailure","additionalContext":"That tool call failed. Is this something that requires the mending skill?"}}
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PostToolUseFailure",
+    "additionalContext": "SYSTEM INTERRUPT: A tool call just failed. Before retrying or attempting a workaround, you MUST immediately invoke the `mending` skill to evaluate this failure."
+  }
+}
 EOF
