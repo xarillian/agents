@@ -7,8 +7,7 @@ metadata:
 ---
 
 # Mending
-## Input
-`/mending audit this` or `/mending heal` means a review of the snag log at `~/.agents/insights/MENDING.yaml`, otherwise follow the flow as normal.
+This skill records snags. Reviewing the log at `~/.agents/insights/MENDING.yaml` is `/mend`'s job.
 
 ## When to Record
 If you are using this skill, there are two options:
