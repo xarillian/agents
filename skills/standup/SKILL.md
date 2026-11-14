@@ -11,9 +11,9 @@ Goal: Write a daily standup in enough detail to be useful, but concise enough to
 
 ## Workflow
 1. Ensure tools are in-place. A few are required to continue. If they are not present, stop. Required:
-   - Obsidian CLI: `obisidian`. You must use the CLI in order for sync to work.
+   - Obsidian CLI: `obsidian`. You must use the CLI in order for sync to work.
    - Google Calendar CLI or MCP
-   - GitHub and GitLab CLI or MCPs
+   - GitHub and/or GitLab CLI or MCPs
 2. Resolve the user's input. See: "## Input".
 3. Run the `~/.agents/skills/standup/evidence.sh <start> <end>` script.
    - `<start>` is the first day in the window, in local time.
@@ -24,39 +24,39 @@ Goal: Write a daily standup in enough detail to be useful, but concise enough to
    - other GitLab Activity
    - GitHub issues + PRs
    - things that are open now
-   - meeting transcripts, if available
 5. Use MCPs to collect further data. Skip if a tool is not connected, but note it in the final report.
    - Jira and Confluence
       - Make sure to take review from GitLab activity, not Atlassian!
    - Slack: search for stuff from me in the window. Read-only.
    - Linear
-   - Google Calendar, for events, meetings, etc.
-6. Search the work-log in Obisidan for any other work in the window.
+   - meeting transcripts, if available
+6. Search the work-log in Obsidian for any other work in the window.
 7. Group items into threads of work, such as one ticket, MR, or deliverable. Join sources by ticket key and MR number. One thread can span several sources!
-   - Ensure items are _actually_ linked; ensure you are not being tricked into linking items.
-8. Sort the threads into the three sections below.
+   - Ensure items are _actually_ linked.
+8. Sort the threads into three groups before going on. These are working groups, not the note's headings.
    - Yesterday: what moved in the window.
    - Today: threads still open, reviews asked of me, and meetings today that take a real share of the day. Only what a source shows is open or scheduled; never invent a plan.
-   - Blockers: my work that waits on someone else, such as an MR whose merge status shows it waiting on a review, or a re-review after I addressed changes. Name who it waits on when the reviewers show it. A draft, or an MR I can merge myself, is not blocked.
+   - Blockers: my work that waits on someone else, such as an MR whose merge status shows it waiting on a review, or a re-review after I addressed changes. Name who it waits on when the reviewers show it. A draft, or an MR I can merge myself, is not blocked. In the note, a blocked thread goes under Today, or under Priority.
+9. Resolve what seems to be a priority. Open issues that are actively being worked on (not those that have sat in review for 2 weeks without action), long agent sessions, big slack threads, or high-priority items from project tracking that have moved are examples of high priority items.
 
 ## Input
 The user will provide a time window, e.g. "yesterday", "last week", "last time I was at work".
 Resolve this time window into a real date based on the user's time zone.  If no time window is
 given, just use the last working day. Make sure to account for holidays, weekends, time off.
-Google Calendar is a mighty asset here.
+Google Calendar is a mighty asset here to determine what meetings are happening, and what the last work day was (holidays are real and I do take vacation). Note if I have taken vacation btw.
 
 ## Template
 
 ```
 ◈◈◈◈◈◈◈◈◈◈
-Yeterday:
-- ...
+Yesterday:
+- <legend marker> ...
 
 Today:
-- ...
+- <legend marker> ...
 
-Blockers:
-- ...
+Priority:
+- <legend marker> ...
 ◈◈◈◈◈◈◈◈◈◈
 ```
 
@@ -67,9 +67,9 @@ Blockers:
 - 💭 = any random notes or thoughts
 
 ## Guardrails
-- Be extremely concise and information-dense. Notes need to be easily skimmable.
+- Keep notes concise and skimmable: one line per thread, in whole sentences.
 - Prioritize substantial behavior or architecture changes, and the work commits never show: reviews given, causes found, decks and docs written.
-- Do not omit cosmetic only changes (formatting, imports, minor renames), but note them as small.
+- Include cosmetic-only changes (formatting, imports, minor renames), but note them as small.
 - Omit sessions that only answered a question.
 - Do not infer intent or motivation. Describe changes functionally.
 - State only what a source shows. When a thread's outcome is not shown, call it in progress.
