@@ -1,7 +1,7 @@
 import type { Elements } from 'claude-code'
 
-import { firstLine, readThread } from './quote.ts'
-import type { Part } from './quote.ts'
+import { firstLine, readThread } from './quote.js'
+import type { Part } from './quote.js'
 
 type Table = Elements['terminal' | 'desktop' | 'vscode']
 

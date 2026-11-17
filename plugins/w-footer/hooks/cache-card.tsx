@@ -1,8 +1,8 @@
 import type { Ledger } from '../types'
-import { card, CARD_WIDTH } from './card.tsx'
-import { formatTokens } from './format.ts'
-import { ACCENT, muted, plain, tinted } from './runs.tsx'
-import type { Run, Table } from './runs.tsx'
+import { card, CARD_WIDTH } from './card.js'
+import { formatTokens } from './format.js'
+import { ACCENT, muted, plain, tinted } from './runs.js'
+import type { Run, Table } from './runs.js'
 
 const AXIS_WIDTH = 6
 const PLOT_WIDTH = CARD_WIDTH - 4 - AXIS_WIDTH

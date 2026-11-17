@@ -1,9 +1,9 @@
 import type { SessionRateLimit } from 'claude-code'
 
-import { card } from './card.tsx'
-import { compactCountdown } from './format.ts'
-import { muted, plain, tinted } from './runs.tsx'
-import type { Run, Table } from './runs.tsx'
+import { card } from './card.js'
+import { compactCountdown } from './format.js'
+import { muted, plain, tinted } from './runs.js'
+import type { Run, Table } from './runs.js'
 
 export const LIMITS_COLOR = 'warning'
 

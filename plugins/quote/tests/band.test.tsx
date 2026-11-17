@@ -6,6 +6,7 @@ const SURFACES = ['terminal', 'desktop'] as const
 
 const BAND = {
   hasSurvey: false,
+  isCollapsed: false,
   isWorking: false,
   maxRows: 30,
   bodyColumns: 80,

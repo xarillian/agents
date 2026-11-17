@@ -1,9 +1,9 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-import { withEllipses } from './ellipsis.ts'
-import { hasQuote, quoteAt, quoteDecorations } from './quote.ts'
-import { offer, quotedMessage } from './view.tsx'
+import { withEllipses } from './ellipsis.js'
+import { hasQuote, quoteAt, quoteDecorations } from './quote.js'
+import { offer, quotedMessage } from './view.js'
 
 const CHECK_MS = 300
 const OFFER_MS = 8000

@@ -1,8 +1,8 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-import { footer } from './footer.tsx'
-import { EMPTY_LEDGER, record } from './ledger.ts'
+import { footer } from './footer.js'
+import { EMPTY_LEDGER, record } from './ledger.js'
 
 const ledger = atom({ plugin: 'w-footer', key: 'ledger' } as const, EMPTY_LEDGER)
 const branch = atom({ plugin: 'w-footer', key: 'branch' } as const, null as string | null)

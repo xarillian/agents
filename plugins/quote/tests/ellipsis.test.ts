@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'claude-code/testing'
 
-import { withEllipses } from '../hooks/ellipsis.ts'
+import { withEllipses } from '../hooks/ellipsis.js'
 
 const REPLY = [
   'The detector reads the final reply. source has three producers and zero consumers. Nothing in **Chorus** logs below `Warn`.',

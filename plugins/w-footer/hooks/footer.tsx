@@ -1,12 +1,12 @@
 import type { RenderElement, SessionContextUsage, SessionRateLimit } from 'claude-code'
 
 import type { Ledger } from '../types'
-import { cacheCard } from './cache-card.tsx'
-import { CARD_WIDTH } from './card.tsx'
-import { homePath, singleLine } from './format.ts'
-import { LIMITS_COLOR, limitsCard, remaining, shortestFirst } from './limits.tsx'
-import { ACCENT, faint, line, muted, plain, tinted, widthOf } from './runs.tsx'
-import type { Run, Table } from './runs.tsx'
+import { cacheCard } from './cache-card.js'
+import { CARD_WIDTH } from './card.js'
+import { homePath, singleLine } from './format.js'
+import { LIMITS_COLOR, limitsCard, remaining, shortestFirst } from './limits.js'
+import { ACCENT, faint, line, muted, plain, tinted, widthOf } from './runs.js'
+import type { Run, Table } from './runs.js'
 
 export type FooterState = {
   cwd: string

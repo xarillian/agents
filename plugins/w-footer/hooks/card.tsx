@@ -1,5 +1,5 @@
-import { line } from './runs.tsx'
-import type { Run, Table } from './runs.tsx'
+import { line } from './runs.js'
+import type { Run, Table } from './runs.js'
 
 export const CARD_WIDTH = 48
 

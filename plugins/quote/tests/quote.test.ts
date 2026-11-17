@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'claude-code/testing'
 
-import { firstLine, quoteAt, quoteBlock, quoteDecorations, readThread } from '../hooks/quote.ts'
+import { firstLine, quoteAt, quoteBlock, quoteDecorations, readThread } from '../hooks/quote.js'
 
 describe('a highlight becomes a quote at the cursor', () => {
   test('into an empty prompt, the quote comes first with a blank line left for the reply', () => {

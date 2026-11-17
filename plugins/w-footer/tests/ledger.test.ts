@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'claude-code/testing'
 
-import { EMPTY_LEDGER, record } from '../hooks/ledger.ts'
+import { EMPTY_LEDGER, record } from '../hooks/ledger.js'
 
 const request = (uncached: number, read: number, written: number, output = 10) => ({
   model: 'claude-opus-5-5',
