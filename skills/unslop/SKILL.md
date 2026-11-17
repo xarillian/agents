@@ -27,7 +27,7 @@ Loop: Examine the patterns below. Scan the target text for the patterns, then re
 ## Style
 - **Em dash overuse.** Avoid em dashes entirely. Use periods or commas only (no parentheses, no en dashes, no hyphen-as-dash). If a thought needs separation, end the sentence or use a comma. Strict application for parentheses, en dashes, and hyphen-as-dash only apply for substitutes. For example, "$5 – $15" is a valid use of the en dash, `grep --version` is a valid use of hyphen-as-dash. 
 - **Colon overuse.** Colons are fine before a list or example, not as mid-sentence connectors. "If you're coming from traditional automation: instead of registering event handlers, you describe conditions" adds nothing with the colon. Rewrite to let the point stand on its own without comparison framing. "Describing when the scheduler should fire works best as plain English." Same meaning, no crutch punctuation.
-  - Prefixes are explicitly allowed to use colons. For example, "**Inference**: <subject of what is inferred>.""``
+  - Prefixes are explicitly allowed to use colons. For example, "**Inference**: <subject of what is inferred>."
 - **Boldface overuse.** Don't bold every proper noun or acronym. Don't bold every list! (hypocrisy in this skill is noted)
 - **Inline-header lists.** The tell is a bold label and colon that restates the line: "**Performance:** Performance improved...". Convert those to prose. A bold lead-in that ends in a period, names the item, and is followed by genuinely new detail ("**Schema in TypeScript.** Tables live in one file.") is fine, not a tell.
 - **Title case headings.** Use sentence case.
