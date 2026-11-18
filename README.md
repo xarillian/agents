@@ -22,7 +22,9 @@ cd ~/.agents
 ## Repo Map
 
 ```text
+bin/          Tools to run by hand
 commands/     Slash commands shared by every harness
+hooks/        Scripts that harness hooks run
 skills/       Skills shared by every harness
 harnesses/    What belongs to one harness:
   claude/       settings.json (shared layer) and plugins/

@@ -37,7 +37,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$HOME/.agents/bin/warn-on-drift.sh\"",
+            "command": "\"$HOME/.agents/hooks/warn-on-drift.sh\"",
             "timeout": 10
           }
         ]
@@ -49,7 +49,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$HOME/.agents/bin/log-skill-use.sh\""
+            "command": "\"$HOME/.agents/hooks/log-skill-use.sh\""
           }
         ]
       }
@@ -59,7 +59,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$HOME/.agents/bin/log-skill-use.sh\""
+            "command": "\"$HOME/.agents/hooks/log-skill-use.sh\""
           }
         ]
       }
@@ -69,7 +69,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$HOME/.agents/bin/mending-nudge.sh\""
+            "command": "\"$HOME/.agents/hooks/mending-nudge.sh\""
           }
         ]
       }
