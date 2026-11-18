@@ -37,7 +37,6 @@ function screen(): UsageSnapshot {
 					{ label: "weekly opus (7d)", remaining: 62, resetAt: inTwoAndAHalfDays },
 				],
 			},
-			{ provider: "codex", name: "Codex", configured: false, fetchedAt: AFTERNOON, unavailable: "no credential" },
 			{
 				provider: "openrouter",
 				name: "OpenRouter",
@@ -85,18 +84,18 @@ test("ages every timestamp as the entry scrolls back, rather than freezing at fe
 });
 
 test("says nothing about age for an entry saved before results carried their own timestamp", () => {
-	const legacy = { results: [{ provider: "codex", name: "Codex", configured: true } as unknown as UsageResult] };
-	assert.equal(usageLines(legacy, plainStyle, AFTERNOON)[2], "● Codex");
+	const legacy = { results: [{ provider: "openrouter", name: "OpenRouter", configured: true } as unknown as UsageResult] };
+	assert.equal(usageLines(legacy, plainStyle, AFTERNOON)[2], "◇ OpenRouter");
 });
 
 test("keeps a provider you configured but could not reach, so the failure stays visible", () => {
 	const snapshot: UsageSnapshot = {
-		results: [{ provider: "codex", name: "Codex", configured: true, fetchedAt: AFTERNOON, unavailable: "request failed" }],
+		results: [{ provider: "openrouter", name: "OpenRouter", configured: true, fetchedAt: AFTERNOON, unavailable: "request failed" }],
 	};
 	assert.deepEqual(usageLines(snapshot, plainStyle, AFTERNOON), [
 		"Usage",
 		"",
-		"● Codex · updated just now",
+		"◇ OpenRouter · updated just now",
 		"unavailable (request failed)",
 	]);
 });
@@ -148,32 +147,6 @@ test("says why usage credits are off, rather than leaving a bare switch", () => 
 		{ credits: { state: "off", reason: "out of credits" } },
 	);
 	assert.deepEqual(normalize("claude", { spend: { enabled: false, balance: null } }), { credits: { state: "off" } });
-	assert.deepEqual(normalize("codex", { credits: { has_credits: false, balance: "0" } }), { credits: { state: "off" } });
-	assert.deepEqual(normalize("codex", { credits: { unlimited: true } }), { credits: { state: "unlimited" } });
-	assert.deepEqual(
-		normalize("codex", { credits: { has_credits: true, balance: "7.25" } }),
-		{ credits: { state: "balance", amount: 7.25, currency: "USD", decimals: 2 } },
-	);
-});
-
-test("labels Codex windows by their declared duration, since the keys carry none", () => {
-	const now = Date.UTC(2026, 0, 2, 1, 34, 5);
-	const data = normalize("codex", {
-		rate_limit: {
-			secondary_window: { used_percent: 23, limit_window_seconds: 7 * 86_400, reset_at: now + (6 * 24 + 7) * 3_600_000 },
-			primary_window: { used_percent: 49, limit_window_seconds: 18_000, reset_at: now + 90 * 60_000 },
-		},
-	});
-	assert.deepEqual(data, {
-		windows: [
-			{ label: "session (5h)", remaining: 51, resetAt: now + 90 * 60_000 },
-			{ label: "weekly (7d)", remaining: 77, resetAt: now + (6 * 24 + 7) * 3_600_000 },
-		],
-	});
-	assert.equal(
-		formatStatus("codex", { provider: "codex", name: "Codex", configured: true, ...data! }, now),
-		"● codex 51% ↻ 1h30m 77% ↻ 6d7h",
-	);
 });
 
 test("shows OpenRouter account credits remaining without inventing quota semantics", () => {
@@ -194,7 +167,6 @@ test("formats reset countdowns and maps active providers safely", () => {
 	assert.equal(compactCountdown(now + 100 * 86_400_000, now), "100d");
 	assert.equal(compactCountdown(now + 90 * 60_000, now), "1h30m");
 	assert.equal(providerForModel("anthropic"), "claude");
-	assert.equal(providerForModel("openai-codex"), "codex");
 	assert.equal(providerForModel("openrouter"), "openrouter");
 	assert.equal(providerForModel("other"), undefined);
 });
@@ -205,7 +177,6 @@ test("starts all provider requests concurrently and keeps successes after a fail
 	const snapshot = await collectUsage(
 		{
 			claude: { token: "claude" },
-			codex: { token: "codex", accountId: "account" },
 			openrouter: { token: "openrouter" },
 		},
 		async (url) => {
@@ -213,14 +184,13 @@ test("starts all provider requests concurrently and keeps successes after a fail
 			maximumActive = Math.max(maximumActive, active);
 			await new Promise((resolve) => setTimeout(resolve, 5));
 			active--;
-			if (url === endpoints.codex) throw new Error("offline");
-			if (url === endpoints.claude) return response({ five_hour: { utilization: 40 } });
-			return response({ data: { total_credits: 2, total_usage: 2 } });
+			if (url === endpoints.openrouter) throw new Error("offline");
+			return response({ five_hour: { utilization: 40 } });
 		},
 		AFTERNOON,
 	);
 
-	assert.equal(maximumActive, 3);
+	assert.equal(maximumActive, 2);
 	assert.deepEqual(snapshot.results, [
 		{
 			provider: "claude",
@@ -229,14 +199,7 @@ test("starts all provider requests concurrently and keeps successes after a fail
 			fetchedAt: AFTERNOON,
 			windows: [{ label: "session (5h)", remaining: 60, resetAt: undefined }],
 		},
-		{ provider: "codex", name: "Codex", configured: true, fetchedAt: AFTERNOON, unavailable: "request failed" },
-		{
-			provider: "openrouter",
-			name: "OpenRouter",
-			configured: true,
-			fetchedAt: AFTERNOON,
-			credits: { state: "balance", amount: 0, currency: "USD", decimals: 2 },
-		},
+		{ provider: "openrouter", name: "OpenRouter", configured: true, fetchedAt: AFTERNOON, unavailable: "request failed" },
 	]);
 });
 
@@ -252,7 +215,6 @@ test("reports each missing credential without making a request, and shows an emp
 		snapshot.results.map((result) => [result.provider, result.configured, result.unavailable]),
 		[
 			["claude", false, "no credential"],
-			["codex", false, "no credential"],
 			["openrouter", false, "no credential"],
 		],
 	);
@@ -269,7 +231,7 @@ test("treats unreadable credential files as absent", async () => {
 				throw new Error("permission denied");
 			},
 		}),
-		{ claude: undefined, codex: undefined, openrouter: undefined },
+		{ claude: undefined, openrouter: undefined },
 	);
 });
 
@@ -285,20 +247,17 @@ test("uses fresh Pi OAuth credentials without writing auth files", async () => {
 			paths.push(path);
 			return {
 				"/home/test/.claude/.credentials.json": { claudeAiOauth: { accessToken: "local-claude", expiresAt: now + 1000 } },
-				"/home/test/.codex/auth.json": { tokens: { access_token: "local-codex", account_id: "local-account" } },
 				"/home/test/pi/auth.json": {
 					anthropic: { type: "oauth", access: "runtime-claude", refresh: "unused", expires: now + 1000 },
-					"openai-codex": { type: "oauth", access: "runtime-codex", refresh: "unused", expires: now + 1000, accountId: "runtime-account" },
 					openrouter: { type: "api_key", key: "runtime-openrouter" },
 				},
 			}[path];
 		},
 	});
 
-	assert.deepEqual(paths.sort(), ["/home/test/.claude/.credentials.json", "/home/test/.codex/auth.json", "/home/test/pi/auth.json"]);
+	assert.deepEqual(paths.sort(), ["/home/test/.claude/.credentials.json", "/home/test/pi/auth.json"]);
 	assert.deepEqual(credentials, {
 		claude: { token: "runtime-claude" },
-		codex: { token: "runtime-codex", accountId: "runtime-account" },
 		openrouter: { token: "runtime-openrouter" },
 	});
 });
@@ -312,17 +271,14 @@ test("falls back from expired Pi OAuth to local credentials and environment", as
 		env: { OPENROUTER_API_KEY: "environment-key" },
 		readJson: async (path) => {
 			if (path.endsWith(".claude/.credentials.json")) return { claudeAiOauth: { accessToken: "local-claude", expiresAt: now + 1000 } };
-			if (path.endsWith(".codex/auth.json")) return { tokens: { access_token: "local-codex", account_id: "local-account" } };
 			return {
 				anthropic: { type: "oauth", access: "expired-claude", refresh: "unused", expires: now - 1 },
-				"openai-codex": { type: "oauth", access: "expired-codex", refresh: "unused", expires: now - 1 },
 			};
 		},
 	});
 
 	assert.deepEqual(credentials, {
 		claude: { token: "local-claude" },
-		codex: { token: "local-codex", accountId: "local-account" },
 		openrouter: { token: "environment-key" },
 	});
 });
@@ -332,7 +288,6 @@ test("uses only exact official endpoints, GET, auth headers, redirects blocked, 
 	await collectUsage(
 		{
 			claude: { token: "claude-token" },
-			codex: { token: "codex-token", accountId: "account-id" },
 			openrouter: { token: "openrouter-token" },
 		},
 		async (url, init) => {
@@ -341,7 +296,7 @@ test("uses only exact official endpoints, GET, auth headers, redirects blocked, 
 		},
 	);
 
-	assert.deepEqual(requests.map(({ url }) => url), [endpoints.claude, endpoints.codex, endpoints.openrouter]);
+	assert.deepEqual(requests.map(({ url }) => url), [endpoints.claude, endpoints.openrouter]);
 	for (const { init } of requests) {
 		assert.equal(init.method, "GET");
 		assert.equal(init.redirect, "error");
@@ -353,9 +308,5 @@ test("uses only exact official endpoints, GET, auth headers, redirects blocked, 
 	assert.equal(claudeHeaders.get("authorization"), "Bearer claude-token");
 	assert.equal(claudeHeaders.get("accept"), "application/json");
 	assert.equal(claudeHeaders.get("anthropic-beta"), "oauth-2025-04-20");
-	const codexHeaders = new Headers(requests[1]!.init.headers);
-	assert.equal(codexHeaders.get("authorization"), "Bearer codex-token");
-	assert.equal(codexHeaders.get("chatgpt-account-id"), "account-id");
-	assert.equal(codexHeaders.get("originator"), "pi");
-	assert.equal(new Headers(requests[2]!.init.headers).get("authorization"), "Bearer openrouter-token");
+	assert.equal(new Headers(requests[1]!.init.headers).get("authorization"), "Bearer openrouter-token");
 });

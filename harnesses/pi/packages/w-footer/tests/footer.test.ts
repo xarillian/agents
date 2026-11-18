@@ -177,7 +177,7 @@ test("usage status opens the live provider card, including clipped statuses and 
 	const events = { on: (name: string, fn: Function) => bus.on(name, fn as any), emit: (name: string, data: unknown) => bus.emit(name, data) };
 	installFooter({ events, registerCommand: (name, command) => commands.set(name, command), on: (name, fn) => handlers.set(name, fn) } as any);
 	const now = Date.now();
-	let result: any = { provider: "codex", name: "Codex", configured: true, fetchedAt: now, windows: [
+	let result: any = { provider: "claude", name: "Claude Code", configured: true, fetchedAt: now, windows: [
 		{ label: "session (5h)", remaining: 73, resetAt: now + 3_600_000 },
 		{ label: "weekly (7d)", remaining: 42 },
 	] };
@@ -186,9 +186,9 @@ test("usage status opens the live provider card, including clipped statuses and 
 	let panel: any;
 	let hidden = 0;
 	let input: Function;
-	const statuses = new Map([["agents", "🦊 working"], ["usage", "\u001b[33m● codex 73% ↻ 1h 42%\u001b[0m"], ["z", "other"]]);
+	const statuses = new Map([["agents", "🦊 working"], ["usage", "\u001b[33m◆ claude 73% ↻ 1h 42%\u001b[0m"], ["z", "other"]]);
 	const ctx: any = {
-		mode: "tui", model: { id: "test", provider: "openai-codex" },
+		mode: "tui", model: { id: "test", provider: "anthropic" },
 		getContextUsage: () => undefined, modelRegistry: { isUsingOAuth: () => true },
 		sessionManager: {
 			getSessionId: () => "test", getLeafId: () => "leaf", getEntries: () => [], getBranch: () => [],
@@ -222,9 +222,9 @@ test("usage status opens the live provider card, including clipped statuses and 
 	input!("\u001b");
 	await commands.get("usage-popup").handler("", ctx);
 	assert.match(panel.render(48).join("\n"), /pinned/);
-	ctx.model.provider = "anthropic";
+	ctx.model.provider = "openrouter";
 	assert.match(panel.render(48).join("\n"), /Usage unavailable/);
-	assert.doesNotMatch(panel.render(48).join("\n"), /Codex/);
+	assert.doesNotMatch(panel.render(48).join("\n"), /Claude Code/);
 	for (let width = 0; width < 60; width++) {
 		for (const line of panel.render(width)) assert.ok(visibleWidth(line) <= width);
 	}

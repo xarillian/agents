@@ -16,7 +16,7 @@ type UsageEntry = { snapshot?: UsageSnapshot; message?: string };
 type Theme = ExtensionContext["ui"]["theme"];
 
 const providerColor = (provider: Provider) =>
-	provider === "claude" ? "warning" : provider === "codex" ? "accent" : "success";
+	provider === "claude" ? "warning" : "success";
 
 const USAGE_TITLE = [
 	"██╗   ██╗███████╗ █████╗  ██████╗ ███████╗",
@@ -95,7 +95,7 @@ export default function (pi: ExtensionAPI) {
 	});
 
 	pi.registerCommand("usage", {
-		description: "Show Claude Code, Codex, and OpenRouter usage.",
+		description: "Show Claude Code and OpenRouter usage.",
 		handler: async (args, ctx) => {
 			if (args.trim()) {
 				const message = "Usage: /usage takes no arguments";

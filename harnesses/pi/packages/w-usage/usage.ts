@@ -2,7 +2,6 @@ import { normalize } from "./presentation.ts";
 
 export const endpoints = {
 	claude: "https://api.anthropic.com/api/oauth/usage",
-	codex: "https://chatgpt.com/backend-api/wham/usage",
 	openrouter: "https://openrouter.ai/api/v1/credits",
 } as const;
 
@@ -10,7 +9,6 @@ export type Provider = keyof typeof endpoints;
 
 export interface Credential {
 	token?: string;
-	accountId?: string;
 }
 
 export interface UsageWindow {
@@ -21,7 +19,6 @@ export interface UsageWindow {
 
 export type Credits =
 	| { state: "off"; reason?: string }
-	| { state: "unlimited" }
 	| { state: "balance"; amount: number; currency: string; decimals: number };
 
 export interface UsageData {
@@ -31,7 +28,7 @@ export interface UsageData {
 
 export interface UsageResult {
 	provider: Provider;
-	name: "Claude Code" | "Codex" | "OpenRouter";
+	name: "Claude Code" | "OpenRouter";
 	configured: boolean;
 	fetchedAt: number;
 	windows?: UsageWindow[];
@@ -61,7 +58,6 @@ export async function collectUsage(
 ): Promise<UsageSnapshot> {
 	const results = await Promise.all([
 		collectProviderUsage("claude", credentials.claude, fetcher, now),
-		collectProviderUsage("codex", credentials.codex, fetcher, now),
 		collectProviderUsage("openrouter", credentials.openrouter, fetcher, now),
 	]);
 	return { results };
@@ -75,7 +71,6 @@ export async function collectProviderUsage(
 ): Promise<UsageResult> {
 	const stamp = { provider, name: providerName(provider), fetchedAt: now };
 	if (!credential?.token) return { ...stamp, configured: false, unavailable: "no credential" };
-	if (provider === "codex" && !credential.accountId) return { ...stamp, configured: false, unavailable: "no account" };
 	try {
 		const response = await fetcher(endpoints[provider], {
 			method: "GET",
@@ -98,21 +93,17 @@ export function requestHeaders(provider: Provider, credential: Credential): Head
 	if (provider === "claude") {
 		return { Authorization: authorization, Accept: "application/json", "anthropic-beta": "oauth-2025-04-20" };
 	}
-	if (provider === "codex") {
-		return { Authorization: authorization, Accept: "application/json", "chatgpt-account-id": credential.accountId!, originator: "pi" };
-	}
 	return { Authorization: authorization, Accept: "application/json" };
 }
 
 export function providerForModel(provider: string | undefined): Provider | undefined {
 	if (provider === "anthropic") return "claude";
-	if (provider === "openai-codex") return "codex";
 	if (provider === "openrouter") return "openrouter";
 	return undefined;
 }
 
 function providerName(provider: Provider): UsageResult["name"] {
-	return provider === "claude" ? "Claude Code" : provider === "codex" ? "Codex" : "OpenRouter";
+	return provider === "claude" ? "Claude Code" : "OpenRouter";
 }
 
 export { discoverCredentials } from "./credentials.ts";

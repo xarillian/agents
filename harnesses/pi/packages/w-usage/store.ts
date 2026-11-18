@@ -10,7 +10,7 @@ import {
 	discoverCredentials,
 } from "./usage.ts";
 
-const ORDER: Provider[] = ["claude", "codex", "openrouter"];
+const ORDER: Provider[] = ["claude", "openrouter"];
 
 type Credentials = Partial<Record<Provider, Credential | undefined>>;
 

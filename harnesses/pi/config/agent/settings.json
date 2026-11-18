@@ -3,8 +3,8 @@
   "theme": "dark",
   "tuiMode": "fullscreen",
   "quietStartup": true,
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-6-astra",
+  "defaultProvider": "openrouter",
+  "defaultModel": "deepseek/deepseek-v4.1-flash-1017",
   "packages": [
     {
       "source": "./packages/w-usage"
@@ -14,9 +14,6 @@
     },
     {
       "source": "npm:pi-subagents"
-    },
-    {
-      "source": "./packages/w-web"
     },
     {
       "source": "./packages/w-clear"
@@ -44,9 +41,6 @@
     },
     {
       "source": "./packages/w-history"
-    },
-    {
-      "source": "./packages/w-compaction"
     }
   ],
   "enableSkillCommands": false,

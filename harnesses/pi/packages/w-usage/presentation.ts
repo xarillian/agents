@@ -38,8 +38,7 @@ export const plainStyle: UsageStyle = {
 export function normalize(provider: Provider, body: unknown): UsageData | undefined {
 	if (provider === "openrouter") return normalizeOpenRouter(body);
 	const data = record(body);
-	if (provider === "claude") return present(collectWindows(data), spendCredits(record(data?.spend)));
-	return present(collectWindows(record(data?.rate_limit)), codexCredits(record(data?.credits)));
+	return present(collectWindows(data), spendCredits(record(data?.spend)));
 }
 
 function present(windows: UsageWindow[], credits: Credits | undefined): UsageData | undefined {
@@ -52,14 +51,6 @@ function spendCredits(spend: RecordValue | undefined): Credits | undefined {
 	if (!spend) return undefined;
 	if (spend.enabled === false) return { state: "off", ...reasonFor(spend.disabled_reason) };
 	return minorUnits(record(spend.balance));
-}
-
-function codexCredits(credits: RecordValue | undefined): Credits | undefined {
-	if (!credits) return undefined;
-	if (credits.unlimited === true) return { state: "unlimited" };
-	if (credits.has_credits === false) return { state: "off" };
-	const balance = nonnegativeNumber(Number(string(credits.balance) ?? credits.balance));
-	return balance === undefined ? undefined : usd(balance);
 }
 
 /** Anthropic quotes money as minor units plus the exponent that scales them, in the account's own currency. */
@@ -101,13 +92,11 @@ export function formatStatus(provider: Provider, result: UsageResult, now = Date
 	return `${providerIcon(provider)} ${provider} ${statusText(result, now)}`;
 }
 
-export function providerIcon(provider: Provider): "◆" | "●" | "◇" {
-	if (provider === "claude") return "◆";
-	if (provider === "codex") return "●";
-	return "◇";
+export function providerIcon(provider: Provider): "◆" | "◇" {
+	return provider === "claude" ? "◆" : "◇";
 }
 
-export function remainingBar(remaining: number, provider: Provider = "codex", width = BAR_WIDTH): string {
+export function remainingBar(remaining: number, provider: Provider = "openrouter", width = BAR_WIDTH): string {
 	const { filled, empty } = barParts(remaining, provider, width);
 	return `[${filled}${empty}]`;
 }
@@ -186,7 +175,6 @@ function labelWidth(results: UsageResult[]): number {
 
 function creditsText(credits: Credits): string {
 	if (credits.state === "off") return credits.reason ? `Off (${credits.reason})` : "Off";
-	if (credits.state === "unlimited") return "Unlimited";
 	return `${money(credits)} remaining`;
 }
 
@@ -195,7 +183,6 @@ function statusText(result: UsageResult, now: number): string {
 	if (!result.windows?.length && result.credits !== undefined) {
 		const credits = result.credits;
 		if (credits.state === "off") return "credits off";
-		if (credits.state === "unlimited") return "unlimited";
 		return `${money(credits)} left`;
 	}
 	return (result.windows ?? [])
@@ -211,17 +198,17 @@ function collectWindows(root: RecordValue | undefined): UsageWindow[] {
 	const windows: SortableWindow[] = [];
 	for (const [key, value] of Object.entries(root)) {
 		const window = record(value);
-		const utilization = number(window?.utilization) ?? number(window?.used_percent);
+		const utilization = number(window?.utilization);
 		if (!window || utilization === undefined) continue;
-		// A quota window states how long it runs. Anything else carrying `utilization` is a
+		// A quota window's key names how long it runs. Anything else carrying `utilization` is a
 		// different kind of object (Anthropic's `extra_usage`) or an unnamed bucket we cannot label.
-		const duration = number(window.limit_window_seconds) ?? parseWindowKey(key).seconds;
+		const duration = parseWindowKey(key).seconds;
 		if (duration === undefined) continue;
 		windows.push({
 			key,
 			label: windowLabel(key, duration),
 			remaining: Math.round(100 - clamp(utilization, 0, 100)),
-			resetAt: timestamp(window.resets_at) ?? timestamp(window.reset_at),
+			resetAt: timestamp(window.resets_at),
 			seconds: duration,
 		});
 	}
@@ -231,11 +218,9 @@ function collectWindows(root: RecordValue | undefined): UsageWindow[] {
 }
 
 function windowLabel(key: string, duration: number): string {
-	const parsed = parseWindowKey(key);
+	const { qualifier } = parseWindowKey(key);
 	const label = durationLabel(duration);
-	if (label === "window") return parsed.qualifier ?? key;
-	// Only a key that spelled out its own duration can also be carrying a model qualifier.
-	const qualifier = parsed.seconds === undefined ? undefined : parsed.qualifier;
+	if (label === "window") return qualifier ?? key;
 	const name = WINDOW_NAMES[duration];
 	if (!name) return qualifier ? `${label} ${qualifier}` : label;
 	return `${qualifier ? `${name} ${qualifier}` : name} (${label})`;

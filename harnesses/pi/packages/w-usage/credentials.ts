@@ -14,14 +14,12 @@ export async function discoverCredentials(sources: CredentialSources = {}): Prom
 	);
 	const readJson = sources.readJson ?? readJsonFile;
 	const timestamp = (sources.now ?? Date.now)();
-	const [claudeData, codexData, piData] = await Promise.all([
+	const [claudeData, piData] = await Promise.all([
 		safeReadJson(readJson, join(home, ".claude", ".credentials.json")),
-		safeReadJson(readJson, join(home, ".codex", "auth.json")),
 		safeReadJson(readJson, join(agentDir, "auth.json")),
 	]);
 	return {
 		claude: runtimeCredential(piData, "anthropic", timestamp, true) ?? claudeLocalCredential(claudeData, timestamp),
-		codex: runtimeCredential(piData, "openai-codex", timestamp, true) ?? codexLocalCredential(codexData),
 		openrouter:
 			runtimeCredential(piData, "openrouter", timestamp) ?? tokenCredential((sources.env ?? process.env).OPENROUTER_API_KEY),
 	};
@@ -37,15 +35,6 @@ function claudeLocalCredential(body: unknown, now: number): Credential | undefin
 	return oauth && fresh(oauth.expiresAt, now, true) ? tokenCredential(oauth.accessToken) : undefined;
 }
 
-function codexLocalCredential(body: unknown): Credential | undefined {
-	const tokens = record(record(body)?.tokens);
-	const credential = tokenCredential(tokens?.access_token);
-	if (!credential) return undefined;
-	const accountId = string(tokens?.account_id) ?? accountIdFromToken(credential.token!);
-	if (accountId) credential.accountId = accountId;
-	return credential;
-}
-
 function runtimeCredential(body: unknown, provider: string, now: number, oauthOnly = false): Credential | undefined {
 	const stored = record(record(body)?.[provider]);
 	if (!stored) return undefined;
@@ -53,25 +42,12 @@ function runtimeCredential(body: unknown, provider: string, now: number, oauthOn
 	if (oauthOnly && !isOAuth) return undefined;
 	const credential = tokenCredential(isOAuth ? stored.access : stored.type === "api_key" ? stored.key : undefined);
 	if (!credential || (isOAuth && !fresh(stored.expires, now))) return undefined;
-	const accountId = string(stored.accountId) ?? accountIdFromToken(credential.token!);
-	if (accountId) credential.accountId = accountId;
 	return credential;
 }
 
 function fresh(value: unknown, now: number, optional = false): boolean {
 	if (value === undefined) return optional;
 	return typeof value === "number" && Number.isFinite(value) && value > now;
-}
-
-function accountIdFromToken(token: string): string | undefined {
-	try {
-		const payload = token.split(".")[1];
-		if (!payload) return undefined;
-		const data = record(JSON.parse(Buffer.from(payload, "base64url").toString("utf8")));
-		return string(record(data?.["https://api.openai.com/auth"])?.chatgpt_account_id);
-	} catch {
-		return undefined;
-	}
 }
 
 function record(value: unknown): RecordValue | undefined {

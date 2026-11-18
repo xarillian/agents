@@ -55,7 +55,7 @@ export default function (pi: ExtensionAPI) {
 			}, (lines) => {
 				const status = footerData.getExtensionStatuses().get("usage");
 				if (!status) return undefined;
-				const badge = findBadge(lines.slice(1), /[◆●◇] (?:claude|codex|openrouter)\b/);
+				const badge = findBadge(lines.slice(1), /[◆◇] (?:claude|openrouter)\b/);
 				if (!badge) return undefined;
 				const row = badge.row + 1;
 				return { ...badge, row, end: Math.min(visibleWidth(lines[row]), badge.start + visibleWidth(stripTerminalSequences(status))) };

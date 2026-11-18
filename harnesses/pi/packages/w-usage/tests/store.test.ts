@@ -7,20 +7,18 @@ const AFTERNOON = new Date(2026, 8, 5, 15, 0, 0).getTime();
 
 const ALL_CREDENTIALS = {
 	claude: { token: "claude" },
-	codex: { token: "codex", accountId: "account" },
 	openrouter: { token: "openrouter" },
 };
 
 function providers() {
 	const requested: string[] = [];
-	const remaining = { claude: 40, codex: 10 };
+	const remaining = { claude: 40 };
 	return {
 		requested,
 		remaining,
 		fetcher: async (url: string) => {
 			requested.push(url);
 			if (url === endpoints.claude) return body({ five_hour: { utilization: remaining.claude } });
-			if (url === endpoints.codex) return body({ rate_limit: { primary: { used_percent: remaining.codex, limit_window_seconds: 18_000 } } });
 			return body({ data: { total_credits: 5, total_usage: 1 } });
 		},
 	};
@@ -47,7 +45,7 @@ test("one sweep feeds every reader, so the screen and the bar cannot disagree", 
 
 	assert.deepEqual(
 		snapshot.results.map((result) => result.provider),
-		["claude", "codex", "openrouter"],
+		["claude", "openrouter"],
 		"the screen reads every provider in a settled order",
 	);
 	assert.equal(store.result("claude")?.windows?.[0]?.remaining, 60, "the bar reads the very same result");
