@@ -39,9 +39,9 @@
       ]
     },
     {
-      "name": "w-footer",
+      "name": "footer",
       "description": "A resource-aware footer: context, cost, tokens and cache reuse under the prompt.",
-      "source": "./harnesses/claude/plugins/w-footer",
+      "source": "./harnesses/claude/plugins/footer",
       "version": "0.1.0",
       "author": {
         "name": "Austin Wayne"

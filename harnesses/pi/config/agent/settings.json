@@ -7,40 +7,40 @@
   "defaultModel": "deepseek/deepseek-v4.1-flash-1017",
   "packages": [
     {
-      "source": "./packages/w-usage"
+      "source": "./packages/usage"
     },
     {
-      "source": "./packages/w-footer"
+      "source": "./packages/footer"
     },
     {
       "source": "npm:pi-subagents"
     },
     {
-      "source": "./packages/w-clear"
+      "source": "./packages/clear"
     },
     {
-      "source": "./packages/w-startup"
+      "source": "./packages/startup"
     },
     {
-      "source": "./packages/w-host-context"
+      "source": "./packages/host-context"
     },
     {
-      "source": "./packages/w-deduplicate"
+      "source": "./packages/deduplicate"
     },
     {
-      "source": "./packages/w-effort"
+      "source": "./packages/effort"
     },
     {
-      "source": "./packages/w-quote"
+      "source": "./packages/quote"
     },
     {
-      "source": "./packages/w-spinner-verbs"
+      "source": "./packages/spinner-verbs"
     },
     {
-      "source": "./packages/w-hotkeys"
+      "source": "./packages/hotkeys"
     },
     {
-      "source": "./packages/w-history"
+      "source": "./packages/history"
     }
   ],
   "enableSkillCommands": false,

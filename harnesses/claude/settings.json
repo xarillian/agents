@@ -83,7 +83,7 @@
     "review@xarillian-agents": true,
     "quote@xarillian-agents": true,
     "cc-plugin-you-should-know@builtin": true,
-    "w-footer@xarillian-agents": true,
+    "footer@xarillian-agents": true,
     "frontend-design@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
     "swift-lsp@claude-plugins-official": true,
