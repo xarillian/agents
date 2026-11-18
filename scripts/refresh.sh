@@ -13,7 +13,6 @@
 set -euo pipefail
 
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
-USAGE_OPTIONS="[--pull-settings]"
 BUILD="$REPO/build"
 
 prune_repo_links() {
@@ -121,80 +120,29 @@ install_pi_packages() {
     return 0
 }
 
-# Settings layer the profile's overlay over the shared file. Arrays
-# concatenate, so a profile adds permissions instead of replacing them.
-CLAUDE_SETTINGS="$BUILD/claude-settings.json"
-MERGE_LAYERS='
-def merge($a; $b):
-    if ($a | type) == "object" and ($b | type) == "object" then
-        reduce ($b | keys_unsorted[]) as $key ($a; .[$key] = merge($a[$key]; $b[$key]))
-    elif ($a | type) == "array" and ($b | type) == "array" then $a + ($b - $a)
-    else $b end;
-reduce .[] as $layer ({}; merge(.; $layer))'
+CLAUDE_SETTINGS="$REPO/harnesses/claude/settings.json"
 
-claude_overlay() {
-    echo "$REPO/profiles/$PROFILE/claude.settings.json"
-}
-
-build_claude_settings() {
-    local layers=("$REPO/harnesses/claude/settings.json")
-
-    [[ -f "$(claude_overlay)" ]] && layers+=("$(claude_overlay)")
-    jq -s "$MERGE_LAYERS" "${layers[@]}" >"$CLAUDE_SETTINGS"
-}
-
-# Permissions Claude Code granted in ~/.claude/settings.json that neither
-# layer holds yet, as {"allow": [...], ...}.
-unpulled_permissions() {
-    [[ -f ~/.claude/settings.json ]] || { echo '{}'; return 0; }
-    jq -n --slurpfile live ~/.claude/settings.json --slurpfile built "$CLAUDE_SETTINGS" '
-        ($built[0].permissions // {}) as $known
-        | $live[0].permissions // {}
-        | with_entries(select(.value | type == "array") | .value -= ($known[.key] // []))
-        | with_entries(select(.value != []))'
-}
-
-# A permission approved on one machine lands in that machine's overlay;
-# promote it to the shared file by hand when every machine wants it.
-pull_claude_settings() {
-    local new
-    local overlay
-
-    new="$(unpulled_permissions)"
-    [[ "$new" != "{}" ]] || { echo "no new Claude Code permissions to pull"; return 0; }
-    overlay="$(claude_overlay)"
-    [[ -f "$overlay" ]] || echo '{}' >"$overlay"
-    jq --argjson new "$new" '
-        reduce ($new | keys[]) as $key (.; .permissions[$key] = ((.permissions[$key] // []) + $new[$key]))' \
-        "$overlay" >"$overlay.tmp"
-    mv "$overlay.tmp" "$overlay"
-    echo "pulled into ${overlay#"$REPO"/}:"
-    jq -r '.[][]' <<<"$new" | sed 's/^/  /'
-    build_claude_settings
-}
-
-# Claude Code writes approvals into its settings file, and replacing it
-# would drop them, so refuse until they are pulled.
-check_claude_settings_pulled() {
-    local new
-
-    new="$(unpulled_permissions)"
-    [[ "$new" == "{}" ]] && return 0
-    echo "~/.claude/settings.json has permissions the repo lacks:" >&2
-    jq -r '.[][]' <<<"$new" | sed 's/^/  /' >&2
-    echo "rerun with --pull-settings to keep them, or remove them from ~/.claude/settings.json" >&2
-    exit 1
-}
-
-# A copy, not a link: Claude Code's own edits must not reach the repo
-# until they are pulled.
+# A link, so whatever Claude Code saves (approvals, /model) lands in the repo.
 install_claude_settings() {
     rm -f ~/.claude/settings.json
-    cp "$CLAUDE_SETTINGS" ~/.claude/settings.json
+    ln -s "$CLAUDE_SETTINGS" ~/.claude/settings.json
 }
 
-claude_marketplace_sources() {
-    jq -r '.extraKnownMarketplaces[].source | .repo // .url // .path' "$CLAUDE_SETTINGS"
+# Settings are shared by every profile, but the Andgo marketplace is only
+# reachable from treetops; its plugins are skipped everywhere else.
+marketplace_reachable() {
+    [[ "$1" != andgo-plugins || "$PROFILE" == treetops ]]
+}
+
+reachable_marketplace_sources() {
+    local name
+    local source
+
+    while IFS=$'\t' read -r name source; do
+        marketplace_reachable "$name" && echo "$source"
+    done < <(jq -r '.extraKnownMarketplaces | to_entries[]
+        | [.key, (.value.source | .repo // .url // .path)] | @tsv' "$CLAUDE_SETTINGS")
+    return 0
 }
 
 add_claude_marketplaces() {
@@ -202,7 +150,7 @@ add_claude_marketplaces() {
 
     while IFS= read -r source; do
         claude plugin marketplace add "$source"
-    done < <(claude_marketplace_sources)
+    done < <(reachable_marketplace_sources)
     claude plugin marketplace update "$(jq -r .name "$REPO/.claude-plugin/marketplace.json")"
     return 0
 }
@@ -222,6 +170,7 @@ install_claude_plugins() {
     installed="$(claude plugin list --json | jq -r '.[].id')"
     while IFS= read -r plugin; do
         grep -qxF "$plugin" <<<"$installed" && continue
+        marketplace_reachable "${plugin#*@}" || continue
         claude plugin install "$plugin" --scope user --yes
     done < <(enabled_claude_plugins)
     return 0
@@ -229,12 +178,6 @@ install_claude_plugins() {
 
 parse_profile "$@"
 shift 2
-PULL_SETTINGS=false
-case "${1:-}" in
-    "") ;;
-    --pull-settings) PULL_SETTINGS=true; shift ;;
-    *) usage ;;
-esac
 [[ $# == 0 ]] || usage
 
 require_command pi
@@ -245,12 +188,6 @@ mkdir -p "$BUILD"
 strip_frontmatter "$REPO/AGENTS.base.md" > "$BUILD/AGENTS.md"
 rm -f "$BUILD/host-context.md"
 ln -s "$REPO/profiles/$PROFILE/host-context.md" "$BUILD/host-context.md"
-
-build_claude_settings
-if $PULL_SETTINGS; then
-    pull_claude_settings
-fi
-check_claude_settings_pulled
 
 link_config_tree "$REPO/harnesses/pi/config" "$HOME/.pi" .json
 mkdir -p ~/.pi/agent/packages

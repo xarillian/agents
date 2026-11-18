@@ -13,7 +13,7 @@ profile_names() {
 }
 
 usage() {
-    echo "usage: $0 --profile $(profile_names)${USAGE_OPTIONS:+ $USAGE_OPTIONS}" >&2
+    echo "usage: $0 --profile $(profile_names)" >&2
     exit 1
 }
 
