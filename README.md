@@ -30,5 +30,5 @@ harnesses/    What belongs to one harness:
   claude/       settings.json (shared layer) and plugins/
   pi/           config/ (mirrors ~/.pi) and packages/
   codex/        config/ (mirrors ~/.codex)
-profiles/     What differs per machine: host context, skills, Claude settings overlay
+profiles/     What differs per machine: host context, skills, Claude settings overlay, skill usage log
 ```
