@@ -1,7 +1,8 @@
 {
   "cleanupPeriodDays": 99999,
   "env": {
-    "_ZO_DOCTOR": "0"
+    "_ZO_DOCTOR": "0",
+    "CLAUDE_CODE_EXPERIMENTAL_CODE_MODE": "1"
   },
   "attribution": {
     "commit": "",
