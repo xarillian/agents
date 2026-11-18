@@ -3,25 +3,10 @@
 
 set -euo pipefail
 
-REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-[[ $# == 2 && "$1" == "--profile" ]] || {
-    echo "usage: $0 --profile technicolor|treetops|kaleidoscope"
-    exit 1
-}
-PROFILE="$2"
-
-[[ "$PROFILE" == "technicolor" || "$PROFILE" == "treetops" || "$PROFILE" == "kaleidoscope" ]] || {
-    echo "unknown profile: $PROFILE"
-    exit 1
-}
-
-require_command() {
-    command -v "$1" >/dev/null || {
-        echo "$1 is not installed; run setup.sh first" >&2
-        exit 1
-    }
-}
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+parse_profile "$@"
+shift 2
+[[ $# == 0 ]] || usage
 
 require_command pi
 require_command claude
@@ -41,4 +26,4 @@ codex update
 
 # updates can clobber symlinked config (e.g. ~/.claude/settings.json)
 # with plain files; re-link everything so local overrides always win.
-"$REPO/refresh.sh" --profile "$PROFILE"
+"$REPO/scripts/refresh.sh" --profile "$PROFILE"

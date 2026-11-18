@@ -13,11 +13,11 @@ warn() {
 git -C "$repo" fetch --quiet 2>/dev/null
 behind=$(git -C "$repo" rev-list --count 'HEAD..@{upstream}' 2>/dev/null)
 if [ "${behind:-0}" -gt 0 ]; then
-  warn "~/.agents is $behind commit(s) behind origin; pull, then run refresh.sh."
+  warn "~/.agents is $behind commit(s) behind origin; pull, then run scripts/refresh.sh."
 fi
 
 if [ "$repo/AGENTS.base.md" -nt "$repo/build/AGENTS.md" ]; then
-  warn "AGENTS.base.md changed after AGENTS.md was generated; run refresh.sh."
+  warn "AGENTS.base.md changed after AGENTS.md was generated; run scripts/refresh.sh."
 fi
 
 [ -n "$warnings" ] || exit 0

@@ -6,13 +6,14 @@
 # Sourcing would leave `set -euo pipefail` armed in the caller's shell,
 # which then dies on the next failing prompt hook.
 [[ "${BASH_SOURCE[0]}" == "$0" ]] || {
-    echo "refresh.sh must be run, not sourced: ~/.agents/refresh.sh --profile <name>" >&2
+    echo "refresh.sh must be run, not sourced: ~/.agents/scripts/refresh.sh --profile <name>" >&2
     return 1
 }
 
 set -euo pipefail
 
-REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+USAGE_OPTIONS="[--pull-settings]"
 BUILD="$REPO/build"
 
 prune_repo_links() {
@@ -97,13 +98,6 @@ link_commands() {
 # Frontmatter versions the source; harnesses would load it as instructions.
 strip_frontmatter() {
     awk 'NR == 1 && /^---$/ { front = 1; next } front && /^---$/ { front = 0; next } !front' "$1"
-}
-
-require_command() {
-    command -v "$1" >/dev/null || {
-        echo "$1 is not installed; run setup.sh first" >&2
-        exit 1
-    }
 }
 
 # `pi install` rewrites every matching entry's spelling, so packages already
@@ -233,13 +227,7 @@ install_claude_plugins() {
     return 0
 }
 
-usage() {
-    echo "usage: $0 --profile technicolor|treetops|kaleidoscope [--pull-settings]" >&2
-    exit 1
-}
-
-[[ $# -ge 2 && "$1" == "--profile" ]] || usage
-PROFILE="$2"
+parse_profile "$@"
 shift 2
 PULL_SETTINGS=false
 case "${1:-}" in
@@ -248,11 +236,6 @@ case "${1:-}" in
     *) usage ;;
 esac
 [[ $# == 0 ]] || usage
-
-[[ "$PROFILE" == "technicolor" || "$PROFILE" == "treetops" || "$PROFILE" == "kaleidoscope" ]] || {
-    echo "unknown profile: $PROFILE"
-    exit 1
-}
 
 require_command pi
 require_command claude
