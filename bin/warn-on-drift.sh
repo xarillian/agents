@@ -16,7 +16,7 @@ if [ "${behind:-0}" -gt 0 ]; then
   warn "~/.agents is $behind commit(s) behind origin; pull, then run refresh.sh."
 fi
 
-if [ "$repo/AGENTS.base.md" -nt "$repo/AGENTS.md" ]; then
+if [ "$repo/AGENTS.base.md" -nt "$repo/build/AGENTS.md" ]; then
   warn "AGENTS.base.md changed after AGENTS.md was generated; run refresh.sh."
 fi
 

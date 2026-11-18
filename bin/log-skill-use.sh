@@ -27,9 +27,9 @@ mkdir -p "$(dirname "$private_log")" || exit 1
 printf '%s\n' "$row" >>"$private_log" || exit 1
 
 is_ours "$(printf '%s' "$row" | jq -r .skill)" || exit 0
-# refresh.sh links host-context.md into the active profile, so its directory
+# refresh.sh links build/host-context.md into the active profile, so its directory
 # names the profile; hostnames vary in case and form across machines.
-profile=$(basename "$(dirname "$(readlink "$agents/host-context.md")")") || exit 1
+profile=$(basename "$(dirname "$(readlink "$agents/build/host-context.md")")") || exit 1
 public_log="$agents/usage/$profile.jsonl"
 mkdir -p "$(dirname "$public_log")" || exit 1
 printf '%s' "$row" | jq -c '{occurred_at, skill, invoked_by}' >>"$public_log" || exit 1

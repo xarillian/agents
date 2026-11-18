@@ -13,6 +13,7 @@
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BUILD="$REPO/build"
 
 prune_repo_links() {
     local destination="$1"
@@ -59,17 +60,20 @@ link_config_tree() {
 
 link_skills() {
     local source="$1"
+    shift
     local skill
     local name
+    local destination
 
     [[ -d "$source" ]] || return 0
     for skill in "$source"/*; do
         [[ -d "$skill" ]] || continue
-        [[ -L "$skill" ]] && continue
         name="$(basename "$skill")"
-        rm -rf ~/.claude/skills/"$name" ~/.codex/skills/"$name"
-        ln -s "$skill" ~/.claude/skills/"$name"
-        ln -s "$skill" ~/.codex/skills/"$name"
+        for destination in "$@"; do
+            mkdir -p "$destination"
+            rm -rf "${destination:?}/$name"
+            ln -s "$skill" "$destination/$name"
+        done
     done
     return 0
 }
@@ -86,21 +90,6 @@ link_commands() {
         name="$(basename "$command")"
         rm -rf "$destination/$name"
         ln -s "$command" "$destination/$name"
-    done
-    return 0
-}
-
-link_profile_skills() {
-    local source="$1"
-    local skill
-    local name
-
-    [[ -d "$source" ]] || return 0
-    for skill in "$source"/*; do
-        [[ -d "$skill" ]] || continue
-        name="$(basename "$skill")"
-        rm -rf "$REPO/skills/$name"
-        ln -s "$skill" "$REPO/skills/$name"
     done
     return 0
 }
@@ -193,15 +182,16 @@ require_command pi
 require_command claude
 require_command jq
 
-strip_frontmatter "$REPO/AGENTS.base.md" > "$REPO/AGENTS.md"
-rm -f "$REPO/host-context.md"
-ln -s "$REPO/profiles/$PROFILE/host-context.md" "$REPO/host-context.md"
+mkdir -p "$BUILD"
+strip_frontmatter "$REPO/AGENTS.base.md" > "$BUILD/AGENTS.md"
+rm -f "$BUILD/host-context.md"
+ln -s "$REPO/profiles/$PROFILE/host-context.md" "$BUILD/host-context.md"
 
 link_config_tree "$REPO/config/pi" "$HOME/.pi" .json
 mkdir -p ~/.pi/agent/packages
 prune_repo_links ~/.pi/agent/packages "$REPO/packages"
 rm -f ~/.pi/agent/AGENTS.md
-ln -s "$REPO/AGENTS.md" ~/.pi/agent/AGENTS.md
+ln -s "$BUILD/AGENTS.md" ~/.pi/agent/AGENTS.md
 for package in "$REPO"/packages/*; do
     [[ -d "$package" ]] || continue
     name="$(basename "$package")"
@@ -212,25 +202,21 @@ link_commands ~/.pi/agent/prompts
 install_pi_packages
 
 link_config_tree "$REPO/config/claude" "$HOME/.claude"
-mkdir -p ~/.claude/skills
 rm -f ~/.claude/CLAUDE.md
-ln -s "$REPO/AGENTS.md" ~/.claude/CLAUDE.md
+ln -s "$BUILD/AGENTS.md" ~/.claude/CLAUDE.md
 link_commands ~/.claude/commands
 add_claude_marketplaces
 install_claude_plugins
 
 link_config_tree "$REPO/config/codex" "$HOME/.codex"
-mkdir -p ~/.codex/skills
 rm -f ~/.codex/AGENTS.md
-ln -s "$REPO/AGENTS.md" ~/.codex/AGENTS.md
+ln -s "$BUILD/AGENTS.md" ~/.codex/AGENTS.md
 
-prune_repo_links "$REPO/skills" "$REPO/profiles"
-link_profile_skills "$REPO/profiles/$PROFILE/skills"
+for skills in ~/.claude/skills ~/.codex/skills ~/.pi/agent/skills; do
+    prune_repo_links "$skills" "$REPO/skills"
+    prune_repo_links "$skills" "$REPO/profiles"
+done
 
-prune_repo_links ~/.claude/skills "$REPO/skills"
-prune_repo_links ~/.codex/skills "$REPO/skills"
-prune_repo_links ~/.claude/skills "$REPO/profiles"
-prune_repo_links ~/.codex/skills "$REPO/profiles"
-
-link_skills "$REPO/skills"
-link_skills "$REPO/profiles/$PROFILE/skills"
+# pi already reads ~/.agents/skills itself.
+link_skills "$REPO/skills" ~/.claude/skills ~/.codex/skills
+link_skills "$REPO/profiles/$PROFILE/skills" ~/.claude/skills ~/.codex/skills ~/.pi/agent/skills

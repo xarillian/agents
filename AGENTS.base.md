@@ -76,4 +76,4 @@ Do what, other than you or me, would show the result is right; that is the bar f
 - Keep repository searches bounded.
 - When a shell pipeline is being used as verification, enable `pipefail`.
 
-@~/.agents/host-context.md
+@~/.agents/build/host-context.md
