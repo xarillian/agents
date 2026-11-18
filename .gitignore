@@ -17,5 +17,5 @@ models-store.json
 /build/
 
 # Claude Code lays these beside each mod it loads
-plugins/*/.claude-plugin/types/
-plugins/*/tsconfig.json
+harnesses/claude/plugins/*/.claude-plugin/types/
+harnesses/claude/plugins/*/tsconfig.json

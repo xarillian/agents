@@ -118,7 +118,7 @@ install_pi_packages() {
     local package
     local name
 
-    for package in "$REPO"/packages/*; do
+    for package in "$REPO"/harnesses/pi/packages/*; do
         [[ -d "$package" ]] || continue
         name="$(basename "$package")"
         pi_package_installed "$name" && continue
@@ -143,7 +143,7 @@ claude_overlay() {
 }
 
 build_claude_settings() {
-    local layers=("$REPO/config/claude/settings.json")
+    local layers=("$REPO/harnesses/claude/settings.json")
 
     [[ -f "$(claude_overlay)" ]] && layers+=("$(claude_overlay)")
     jq -s "$MERGE_LAYERS" "${layers[@]}" >"$CLAUDE_SETTINGS"
@@ -269,12 +269,12 @@ if $PULL_SETTINGS; then
 fi
 check_claude_settings_pulled
 
-link_config_tree "$REPO/config/pi" "$HOME/.pi" .json
+link_config_tree "$REPO/harnesses/pi/config" "$HOME/.pi" .json
 mkdir -p ~/.pi/agent/packages
-prune_repo_links ~/.pi/agent/packages "$REPO/packages"
+prune_repo_links ~/.pi/agent/packages "$REPO/harnesses/pi/packages"
 rm -f ~/.pi/agent/AGENTS.md
 ln -s "$BUILD/AGENTS.md" ~/.pi/agent/AGENTS.md
-for package in "$REPO"/packages/*; do
+for package in "$REPO"/harnesses/pi/packages/*; do
     [[ -d "$package" ]] || continue
     name="$(basename "$package")"
     rm -rf ~/.pi/agent/packages/"$name"
@@ -291,7 +291,7 @@ link_commands ~/.claude/commands
 add_claude_marketplaces
 install_claude_plugins
 
-link_config_tree "$REPO/config/codex" "$HOME/.codex"
+link_config_tree "$REPO/harnesses/codex/config" "$HOME/.codex"
 rm -f ~/.codex/AGENTS.md
 ln -s "$BUILD/AGENTS.md" ~/.codex/AGENTS.md
 

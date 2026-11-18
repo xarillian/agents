@@ -22,10 +22,11 @@ cd ~/.agents
 ## Repo Map
 
 ```text
-commands/     Slash commands shared by Pi and Claude Code
-config/       Harness configuration, split by tool
-packages/     Local Pi extensions
-plugins/      Claude Code plugins
-profiles/     Per-machine or per-context overlays, including profile-only skills
-skills/       Reusable agent skills
+commands/     Slash commands shared by every harness
+skills/       Skills shared by every harness
+harnesses/    What belongs to one harness:
+  claude/       settings.json (shared layer) and plugins/
+  pi/           config/ (mirrors ~/.pi) and packages/
+  codex/        config/ (mirrors ~/.codex)
+profiles/     What differs per machine: host context, skills, Claude settings overlay
 ```

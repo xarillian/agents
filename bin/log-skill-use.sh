@@ -10,7 +10,7 @@ private_log="$agents/insights/skill-usage.jsonl"
 # Other plugins' skill names stay out of the public repo.
 is_ours() {
   case $1 in
-    *:*) [ -d "$agents/plugins/${1%%:*}" ] ;;
+    *:*) [ -d "$agents/harnesses/claude/plugins/${1%%:*}" ] ;;
     *) [ -e "$agents/skills/$1" ] || [ -e "$agents/commands/$1.md" ] ;;
   esac
 }

@@ -1,6 +1,6 @@
 ---
 name: mod-porting
-description: Use when porting a feature between a pi package (`packages/`) and a Claude Code mod (`plugins/`), in either direction, or when building one side to match the other.
+description: Use when porting a feature between a pi package (`harnesses/pi/packages/`) and a Claude Code mod (`harnesses/claude/plugins/`), in either direction, or when building one side to match the other.
 ---
 
 # Porting
@@ -12,7 +12,7 @@ A pi package and a Claude Code mod can do much the same things through different
 Neither side imports from the other.
 
 - A Claude plugin is copied into `~/.claude/plugins/cache` on install, so it reaches nothing outside its own folder.
-- pi resolves a package's relative imports from its symlink in `~/.pi/agent/packages`, so a package reaches only its siblings in `packages/`.
+- pi resolves a package's relative imports from its symlink in `~/.pi/agent/packages`, so a package reaches only its siblings in `harnesses/pi/packages/`.
 
 Copy pure helpers, in the target's code style, and give each copy its own tests so the two cannot drift unnoticed.
 
