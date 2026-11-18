@@ -12,6 +12,7 @@ cd ~/.agents
 ```
 
 - `refresh.sh --profile <technicolor|treetops|kaleidoscope>` generates content, refreshes symlinks, adds Claude Code marketplaces, and installs missing pi packages and Claude Code plugins
+- `refresh.sh --profile <name> --pull-settings` first copies permissions Claude Code approved into `profiles/<name>/claude.settings.json`; without it, `refresh.sh` refuses to overwrite them
 - `update.sh --profile <technicolor|treetops|kaleidoscope>` manages updates for all bodies
 
 ## Source of Truth

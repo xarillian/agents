@@ -23,26 +23,10 @@
       "Bash(gcloud run services list *)",
       "Bash(git fetch *)",
       "Bash(git fetch)",
-      "Bash(glab mr list *)",
-      "Bash(glab mr view *)",
       "Bash(hc read *)",
       "Bash(hc wait *)",
       "Bash(herdr-app commands*)",
-      "Bash(herdr-app ls*)",
-      "mcp__claude_ai_Atlassian__getTransitionsForJiraIssue",
-      "mcp__plugin_andgo-company_atlassian__getAccessibleAtlassianResources",
-      "mcp__plugin_andgo-company_atlassian__getConfluenceContent",
-      "mcp__plugin_andgo-company_atlassian__getJiraIssue",
-      "mcp__plugin_andgo-company_atlassian__searchJiraIssuesUsingJql",
-      "mcp__plugin_andgo-company_gitlab__get_job",
-      "mcp__plugin_andgo-company_gitlab__get_merge_request",
-      "mcp__plugin_andgo-company_gitlab__get_pipeline",
-      "mcp__plugin_andgo-company_gitlab__get_repository_file",
-      "mcp__plugin_andgo-company_gitlab__get_user",
-      "mcp__plugin_andgo-company_gitlab__list_commits",
-      "mcp__plugin_andgo-company_gitlab__list_merge_requests",
-      "mcp__plugin_andgo-company_gitlab__list_repository_tree",
-      "mcp__plugin_andgo-company_slack__slack_search_public_and_private"
+      "Bash(herdr-app ls*)"
     ]
   },
   "model": "fable",
@@ -103,7 +87,6 @@
     "w-footer@xarillian-agents": true,
     "frontend-design@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
-    "employee-need-shift-splash@andgo-plugins": true,
     "swift-lsp@claude-plugins-official": true,
     "playground@claude-plugins-official": true
   },
@@ -124,12 +107,6 @@
       "source": {
         "source": "github",
         "repo": "xarillian/agents"
-      }
-    },
-    "andgo-plugins": {
-      "source": {
-        "source": "git",
-        "url": "https://gitlab.dev.ncconsulting.ca/consulting/agent-marketplace.git"
       }
     }
   },

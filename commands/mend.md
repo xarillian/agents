@@ -26,7 +26,7 @@ For each finding, give what happened and how often, the evidence you checked, an
 - a host quirk goes in that profile's `workstation` skill,
 - an under-triggering skill gets a better `description`,
 - behaviour that applies to every session goes in `AGENTS.base.md`,
-- permissions and hooks go in `config/claude/settings.json`,
+- permissions and hooks every machine wants go in `config/claude/settings.json`; ones for this machine only go in `profiles/<profile>/claude.settings.json`,
 - and so on.
 
 Prefer a pointer to the right file or command over a copied description, since a pointer stays correct when the system changes. Make no edits until the user approves a fix. Once a fix lands, offer to remove the resolved snags from `MENDING.yaml`.
