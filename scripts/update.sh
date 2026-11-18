@@ -10,7 +10,6 @@ shift 2
 
 require_command pi
 require_command claude
-require_command codex
 
 pi update --all
 claude update
@@ -22,7 +21,6 @@ while IFS=$'\t' read -r plugin scope; do
     claude plugin update "$plugin" --scope "$scope" --yes
 done
 
-codex update
 
 # updates can clobber symlinked config (e.g. ~/.claude/settings.json)
 # with plain files; re-link everything so local overrides always win.

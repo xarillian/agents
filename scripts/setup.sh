@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install and provision the Pi, Claude Code, and Codex harnesses.
+# Install and provision the Pi and Claude Code harnesses.
 
 set -euo pipefail
 
@@ -18,12 +18,6 @@ fi
 if ! command -v claude >/dev/null; then
     echo "claude code is not installed; installing..."
     curl -fsSL https://claude.ai/install.sh | sh
-fi
-
-## == Codex ==
-if ! command -v codex >/dev/null; then
-    echo "codex is not installed; installing..."
-    curl -fsSL https://chatgpt.com/codex/install.sh | sh
 fi
 
 "$REPO/scripts/update.sh" --profile "$PROFILE"

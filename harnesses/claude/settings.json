@@ -79,7 +79,6 @@
   "enabledPlugins": {
     "clangd-lsp@claude-plugins-official": true,
     "superpowers@claude-plugins-official": false,
-    "codex@openai-codex": false,
     "skill-creator@claude-plugins-official": true,
     "review@xarillian-agents": true,
     "quote@xarillian-agents": true,
@@ -95,12 +94,6 @@
       "source": {
         "source": "github",
         "repo": "anthropics/claude-plugins-official"
-      }
-    },
-    "openai-codex": {
-      "source": {
-        "source": "github",
-        "repo": "openai/codex-plugin-cc"
       }
     },
     "xarillian-agents": {

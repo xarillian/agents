@@ -1,5 +1,5 @@
 # Agent Harnesses
-Personal setup for `pi`, Claude Code, or Codex depending on the machine.
+Personal setup for `pi` or Claude Code depending on the machine.
 
 This repo contains setup and update scripts for those harnesses, links 'em to their appropriate dirs, and generated instructions. Bespoke packages for `pi` and plugins for the chassis are stored here, as well.
 
@@ -17,7 +17,7 @@ cd ~/.agents
 
 ## Source of Truth
 
-`~/.agents` is king. `~/.pi`, `~/.claude`, `~/.codex` hold links and generated output; when they disagree with this repo, they are wrong.
+`~/.agents` is king. `~/.pi` and `~/.claude` hold links and generated output; when they disagree with this repo, they are wrong.
 
 ## Repo Map
 
@@ -29,7 +29,6 @@ skills/       Skills shared by every harness
 harnesses/    What belongs to one harness:
   claude/       settings.json (shared layer) and plugins/
   pi/           config/ (mirrors ~/.pi) and packages/
-  codex/        config/ (mirrors ~/.codex)
 scripts/      setup.sh, update.sh, refresh.sh and their shared lib.sh
 profiles/     What differs per machine: host context, skills, Claude settings overlay, skill usage log
 ```

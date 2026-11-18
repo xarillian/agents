@@ -274,15 +274,11 @@ link_commands ~/.claude/commands
 add_claude_marketplaces
 install_claude_plugins
 
-link_config_tree "$REPO/harnesses/codex/config" "$HOME/.codex"
-rm -f ~/.codex/AGENTS.md
-ln -s "$BUILD/AGENTS.md" ~/.codex/AGENTS.md
-
-for skills in ~/.claude/skills ~/.codex/skills ~/.pi/agent/skills; do
+for skills in ~/.claude/skills ~/.pi/agent/skills; do
     prune_repo_links "$skills" "$REPO/skills"
     prune_repo_links "$skills" "$REPO/profiles"
 done
 
 # pi already reads ~/.agents/skills itself.
-link_skills "$REPO/skills" ~/.claude/skills ~/.codex/skills
-link_skills "$REPO/profiles/$PROFILE/skills" ~/.claude/skills ~/.codex/skills ~/.pi/agent/skills
+link_skills "$REPO/skills" ~/.claude/skills
+link_skills "$REPO/profiles/$PROFILE/skills" ~/.claude/skills ~/.pi/agent/skills
