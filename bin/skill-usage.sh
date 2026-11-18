@@ -4,7 +4,7 @@
 set -euo pipefail
 shopt -s nullglob
 
-logs=("$HOME/.agents/usage"/*.jsonl)
+logs=("$HOME/.agents/profiles"/*/usage.jsonl)
 skills="$HOME/.agents/skills"
 
 invocation_counts() {
@@ -28,7 +28,7 @@ never_invoked() {
 }
 
 if (( ${#logs[@]} == 0 )); then
-  echo "No skill invocations logged yet in $HOME/.agents/usage"
+  echo "No skill invocations logged yet in $HOME/.agents/profiles/*/usage.jsonl"
   exit 0
 fi
 

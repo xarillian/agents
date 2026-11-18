@@ -1,5 +1,5 @@
 # Agent Harnesses
-Personal setup for `pi`, Claude Code, or Codex depending on the machine.
+Personal setup for `pi` or Claude Code depending on the machine.
 
 This repo contains setup and update scripts for those harnesses, links 'em to their appropriate dirs, and generated instructions. Bespoke packages for `pi` and plugins for the chassis are stored here, as well.
 
@@ -8,23 +8,27 @@ This repo contains setup and update scripts for those harnesses, links 'em to th
 ```sh
 git clone https://github.com/xarillian/agents ~/.agents
 cd ~/.agents
-./setup.sh --profile <technicolor|treetops|kaleidoscope>
+./scripts/setup.sh --profile <technicolor|treetops|kaleidoscope>
 ```
 
-- `refresh.sh --profile <technicolor|treetops|kaleidoscope>` generates content, refreshes symlinks, adds Claude Code marketplaces, and installs missing pi packages and Claude Code plugins
-- `update.sh --profile <technicolor|treetops|kaleidoscope>` manages updates for all bodies
+- `scripts/refresh.sh --profile <technicolor|treetops|kaleidoscope>` generates content, refreshes symlinks, adds Claude Code marketplaces, and installs missing pi packages and Claude Code plugins
+- `scripts/refresh.sh --profile <name> --pull-settings` first copies permissions Claude Code approved into `profiles/<name>/claude.settings.json`; without it, `refresh.sh` refuses to overwrite them
+- `scripts/update.sh --profile <technicolor|treetops|kaleidoscope>` manages updates for all bodies
 
 ## Source of Truth
 
-`~/.agents` is king. `~/.pi`, `~/.claude`, `~/.codex` hold links and generated output; when they disagree with this repo, they are wrong.
+`~/.agents` is king. `~/.pi` and `~/.claude` hold links and generated output; when they disagree with this repo, they are wrong.
 
 ## Repo Map
 
 ```text
-commands/     Slash commands shared by Pi and Claude Code
-config/       Harness configuration, split by tool
-packages/     Local Pi extensions
-plugins/      Claude Code plugins
-profiles/     Per-machine or per-context overlays, including profile-only skills
-skills/       Reusable agent skills
+bin/          Tools to run by hand
+commands/     Slash commands shared by every harness
+hooks/        Scripts that harness hooks run
+skills/       Skills shared by every harness
+harnesses/    What belongs to one harness:
+  claude/       settings.json (shared layer) and plugins/
+  pi/           config/ (mirrors ~/.pi) and packages/
+scripts/      setup.sh, update.sh, refresh.sh and their shared lib.sh
+profiles/     What differs per machine: host context, skills, Claude settings overlay, skill usage log
 ```

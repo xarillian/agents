@@ -1,0 +1,145 @@
+{
+  "cleanupPeriodDays": 99999,
+  "env": {
+    "_ZO_DOCTOR": "0"
+  },
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
+  "permissions": {
+    "allow": [
+      "Bash(bq show *)",
+      "Bash(defaults read *)",
+      "Bash(docker compose config *)",
+      "Bash(docker compose logs *)",
+      "Bash(docker compose ps *)",
+      "Bash(docker compose ps)",
+      "Bash(gcloud logging read *)",
+      "Bash(gcloud run revisions describe *)",
+      "Bash(gcloud run revisions list *)",
+      "Bash(gcloud run services describe *)",
+      "Bash(gcloud run services list *)",
+      "Bash(git fetch *)",
+      "Bash(git fetch)",
+      "Bash(hc read *)",
+      "Bash(hc wait *)",
+      "Bash(herdr-app commands*)",
+      "Bash(herdr-app ls*)"
+    ]
+  },
+  "model": "fable",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.agents/hooks/warn-on-drift.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.agents/hooks/log-skill-use.sh\""
+          }
+        ]
+      }
+    ],
+    "UserPromptExpansion": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.agents/hooks/log-skill-use.sh\""
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.agents/hooks/mending-nudge.sh\""
+          }
+        ]
+      }
+    ]
+  },
+  "bashEditDiffEnabled": false,
+  "enabledPlugins": {
+    "clangd-lsp@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": false,
+    "skill-creator@claude-plugins-official": true,
+    "review@xarillian-agents": true,
+    "quote@xarillian-agents": true,
+    "cc-plugin-you-should-know@builtin": true,
+    "footer@xarillian-agents": true,
+    "frontend-design@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": true,
+    "playground@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    },
+    "xarillian-agents": {
+      "source": {
+        "source": "github",
+        "repo": "xarillian/agents"
+      }
+    }
+  },
+  "spinnerVerbs": {
+    "mode": "append",
+    "verbs": [
+      "Channelling",
+      "Consulting the void",
+      "Observing the mysteries",
+      "Pondering the secrets of the divine",
+      "Reaping"
+    ]
+  },
+  "effortLevel": "high",
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "high"
+    },
+    "claude-fable-5-1": {
+      "effortLevel": "xhigh",
+      "autoCompactWindow": 400000
+    },
+    "claude-fable-5-2": {
+      "autoCompactWindow": 400000
+    }
+  },
+  "promptSuggestionEnabled": false,
+  "awaySummaryEnabled": true,
+  "pluginConfigs": {
+    "agents-md@builtin": {
+      "options": {
+        "instructionFiles": "claude-md-and-agents-md"
+      }
+    }
+  },
+  "tui": "fullscreen",
+  "autoMemoryEnabled": false,
+  "showThinkingSummaries": true,
+  "theme": "dark-daltonized",
+  "idleCompaction": false,
+  "switchModelsOnFlag": false,
+  "agentPushNotifEnabled": true
+}

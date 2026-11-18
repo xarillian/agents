@@ -11,7 +11,7 @@
     {
       "name": "review",
       "description": "Review code with focused, evidence-based subagents.",
-      "source": "./plugins/review",
+      "source": "./harnesses/claude/plugins/review",
       "version": "0.1.0",
       "author": {
         "name": "Austin Wayne"
@@ -26,7 +26,7 @@
     {
       "name": "quote",
       "description": "Highlight text, click Quote, and reply to it as a thread.",
-      "source": "./plugins/quote",
+      "source": "./harnesses/claude/plugins/quote",
       "version": "0.1.0",
       "author": {
         "name": "Austin Wayne"
@@ -39,9 +39,9 @@
       ]
     },
     {
-      "name": "w-footer",
+      "name": "footer",
       "description": "A resource-aware footer: context, cost, tokens and cache reuse under the prompt.",
-      "source": "./plugins/w-footer",
+      "source": "./harnesses/claude/plugins/footer",
       "version": "0.1.0",
       "author": {
         "name": "Austin Wayne"

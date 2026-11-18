@@ -26,10 +26,10 @@ Default to **recording**. If an event triggered this skill, log it unless it hit
 
 ## Workflow
 1. Determine if the friction qualifies as a snag. If it does, continue with this workflow. If it does not, continue with your work.
-2. Submit the snag through `~/.agents/bin/mending.sh` immediately before retrying or applying a workaround.
+2. Submit the snag through `~/.agents/skills/mending/scripts/mending.sh` immediately before retrying or applying a workaround.
 
 ```sh
-~/.agents/bin/mending.sh -m "<active-model-id>" -c "<suspected cause or fix>" "<1-sentence summary>"
+~/.agents/skills/mending/scripts/mending.sh -m "<active-model-id>" -c "<suspected cause or fix>" "<1-sentence summary>"
 ```
 
 - `-m` (required): Your exact active model ID (e.g., claude-sonnet-4-6).
