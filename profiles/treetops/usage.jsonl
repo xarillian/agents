@@ -186,3 +186,6 @@
 {"occurred_at":"2026-11-25T15:30:01-0600","skill":"unslop","invoked_by":"model"}
 {"occurred_at":"2026-11-25T15:59:15-0600","skill":"unslop","invoked_by":"model"}
 {"occurred_at":"2026-11-25T16:08:08-0600","skill":"mending","invoked_by":"model"}
+{"occurred_at":"2026-11-25T16:35:45-0600","skill":"truesight","invoked_by":"model"}
+{"occurred_at":"2026-11-25T16:35:54-0600","skill":"mending","invoked_by":"model"}
+{"occurred_at":"2026-11-25T16:37:49-0600","skill":"mending","invoked_by":"model"}
