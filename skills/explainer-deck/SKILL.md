@@ -53,7 +53,10 @@ A teaching deck builds bottom up. Start from what the reader surely knows, add o
 
 ## Phase D: Write
 1. Give each slide a title, one takeaway sentence, and one structure (cards, table, chart, pseudocode, or animation). Two structures compete for the eye and neither lands. A reader should take a slide in at a glance; what doesn't fit goes in its speaker notes.
-2. Pin one source line at the foot (subscript) of each content slide: the file, ADR, or command and date the slide stands on. If its sources won't fit on one line, the slide makes too many claims; split it.
+    - Budget about 50 words under the title and takeaway. Count them. A dense slide is the most common complaint about these decks.
+    - A label is a phrase, not a sentence. The reason, the exception and the test name go in the speaker notes.
+    - A table on a slide has two columns and short cells. A third column is a sign the rows belong in the notes.
+2. Pin one source line at the foot (subscript) of each content slide: the file, ADR, or command and date the slide stands on. If its sources won't fit on one line, the slide makes too many claims; split it. Never cite a commit hash from an unmerged branch, because a rebase changes it. Cite the file, the test, or the merge request.
 3. Define each term before it is used. Use the code's word for it (`rg -o -i` the candidates, pick the most frequent) and its variant names (Completion, not "completed"). Terms the code lacks go in the glossary as new. Spell out shorthand, keeping the code's term in brackets. A proposal that contradicts the code's semantics is a correction, not a name to keep. Set identifiers (agents, packages, paths, functions) as code, in monospace: `agent_evals`, `evals/`.
 4. Give every number a unit, a direction, a range, and its run. Say statistics in plain words: p99 is "the slowest 1 in 100", p50 is "the median". Label inferences on the slide ("likely", "not yet measured").
 5. Show the hard parts.
@@ -66,11 +69,21 @@ A teaching deck builds bottom up. Start from what the reader surely knows, add o
 ## Phase E: Build
 1. Build from a Slides artifact type.
 2. Use the user's design system when there is one (i.e. any skill references or design templates). Otherwise, use a dark cover and closing, light content, and accents for headlines. Nothing under 24px. Body contrast at least 4.5:1.
-    - Give the number to remember its own accent slide: one big figure and what it means. Orange unless the design system offers an accent.
+    - A figure gets its own accent slide only when the deck's conclusion is that figure, and it was measured. Most decks have none. Orange unless the design system offers an accent.
     - Each colour must have one meaning and be colourblind-friendly: add labels.
     - All specific vocabulary must be consistent with one meaning.
-3. Animate mechanisms but not decoration. The slides should be pretty and functional. Loop with a hold on the beginning and end states. Never give an animation a caption, tagline or subtitle. An animation that needs one does not explain itself yet: fix the animation. Show the end state under reduced motion.
-4. Draw the shape of the idea. A table or a row of cards is the fallback, not the default. Read the Slides type's `reference/diagrams.md` and `reference/craft.md` first.
+3. Give every content slide the same frame, so the reader learns it once.
+    - A dark band across the top holds a small uppercase section label, the title at 64px or larger, and one lead sentence at about 32px. The lead is the slide's takeaway.
+    - One drawing fills the body under the band. Body text is 26px to 32px. Text that only fits smaller is too much text: cut it or move it to the speaker notes.
+    - The source line sits at the bottom left and the mascot's rail at the bottom right. Keep the last 100px of the slide clear for them.
+    - Panels are white on a tinted page, with rounded corners and a soft shadow. Only the one panel the slide is about gets a border, in the accent colour.
+    - The slides where something fails or surprises the reader are dark, edge to edge. The change of background marks the turn in the story. Two or three in a deck. More and it marks nothing.
+    - A change is a before and an after, side by side in the same shape, with the difference in the accent colour.
+4. Design the still first. Motion plays only in Present, and most readers scroll.
+    - Each element's plain rule is its finished look. Animate from a hidden `from` keyframe. An element whose plain rule hides it never shows outside Present.
+    - A slide must read complete with no motion. An arrival, such as panels rising in one after another, is polish on top.
+5. Animate mechanisms but not decoration. The slides should be pretty and functional. Loop with a hold on the beginning and end states. A loop ends in the state it starts in, and each fade between states takes a third of a second or longer, so the restart does not jump. Never give an animation a caption, tagline or subtitle. An animation that needs one does not explain itself yet: fix the animation. Show the end state under reduced motion.
+6. Draw the shape of the idea. A table or a row of cards is the fallback, not the default. Read the Slides type's `reference/diagrams.md` and `reference/craft.md` first.
     - A flow with exits is a state diagram: the states in a row, each exit drawn as an arrow to where it leads.
     - An order of preference is a fallback chain: "none" on the arrow to the next choice, and one bar that every success drops into.
     - Something that happens over time sits on a time axis with real marks (0 s, 20 s, 40 s).
@@ -78,10 +91,13 @@ A teaching deck builds bottom up. Start from what the reader surely knows, add o
     - A decision on one input is a fork.
     - A conversation is a transcript: one bubble style per speaker, the good run beside the bad run.
     - The accent colour marks the one outcome the slide is about, and nothing else.
-5. Open the published deck and look at every slide before handing it over. Publishing succeeds even when a slide renders broken. Known gotchas of the Slides type:
+7. Look at every slide twice. Before publishing, render each slide to an image, for example with headless Chrome, and check that nothing overlaps the source line or the rail and that no slide looks empty without motion. Then open the published deck and look at every slide again before handing it over. Publishing succeeds even when a slide renders broken. Known gotchas of the Slides type:
     - A `<p>` does not lay out its text as a flex container. To centre text in a sized box, put the `<p>` inside a flex `<div>`.
     - An element it does not accept hides that part of the slide, and the slide shows "This slide can't be edited right now". `<pre>` is one. Write a pseudocode panel as one `<p>` per line in monospace, indented with `padding-left`.
     - A negative offset (`top:-44px`) is dropped, so the element lands on top of its neighbour. Make the container taller and place children inside it.
+    - `z-index` is ignored. Later markup draws on top, so order the elements.
+    - One positioned container takes at most 24 pinned children. Split a larger drawing across two containers.
+    - Publishing takes an absolute `file_path`, even when `root` is set.
 
 Flourish:
 - Have a fun and relevant animation on the cover slide. It tells the deck's story in miniature, with a cast:
@@ -106,7 +122,7 @@ While it reads, check the rest yourself simultaneously:
 
 Fix what the cold reader flags, then publish only the changed slides.
 
-You, then, should do a final passover. Make sure no slide is too information dense: the ultimate presentation is informative AND easily digestible. Ensure it is that way.
+You, then, should do a final passover. Make sure no slide is too information dense: the ultimate presentation is informative AND easily digestible. Ensure it is that way. Count the words under each slide's title and takeaway, and cut any slide over the budget by moving sentences to its speaker notes. Do this again after every revision, because revisions add text.
 
 ## Outputs
 The deck's link, at the highest publicity level available (private, org-wide, or public). A list of what's not verified. On a revision, one line per changed slide.
