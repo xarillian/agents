@@ -1,0 +1,11 @@
+{
+  "zoom": 1.1,
+  "telemetry": false,
+  "sounds": {
+    "enabled": true
+  },
+  "theme": "astralgrave-porcelain-blue",
+  "font": "Monaspace Neon",
+  "font_size": 12,
+  "appearance": "dark"
+}
