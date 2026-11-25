@@ -24,7 +24,11 @@
       "Bash(gcloud run services list *)",
       "Bash(git fetch *)",
       "Bash(git fetch)",
+      "Bash(hc kill *)",
       "Bash(hc read *)",
+      "Bash(hc rm *)",
+      "Bash(hc run *)",
+      "Bash(hc send *)",
       "Bash(hc wait *)",
       "Bash(herdr-app commands*)",
       "Bash(herdr-app ls*)",
@@ -56,6 +60,15 @@
             "type": "command",
             "command": "\"$HOME/.agents/hooks/warn-on-drift.sh\"",
             "timeout": 10
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.agents/hooks/herdr-context.sh\"",
+            "timeout": 5
           }
         ]
       }
