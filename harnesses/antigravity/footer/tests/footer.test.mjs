@@ -23,18 +23,34 @@ const samplePayload = (overrides = {}) => ({
   },
   cost: { total_usd: 0.42 },
   quota: {
-    weekly: { remaining_fraction: 0.94, reset_in_seconds: 500000 },
-    session: { remaining_fraction: 0.81, reset_in_seconds: 12000 },
-    disabled_bucket: { remaining_fraction: 0.1, reset_in_seconds: 100, disabled: true },
+    '3p-5h': { remaining_fraction: 1, reset_in_seconds: 0 },
+    '3p-weekly': { remaining_fraction: 1, reset_in_seconds: 0 },
+    'gemini-weekly': { remaining_fraction: 0.94, reset_in_seconds: 500000 },
+    'gemini-5h': { remaining_fraction: 0.81, reset_in_seconds: 12000 },
+    'gemini-disabled': { remaining_fraction: 0.1, reset_in_seconds: 100, disabled: true },
   },
   terminal_width: 120,
   ...overrides,
 })
 
 describe('antigravity footer', () => {
-  it('renders context meter, cost, cache reuse, shortest-first quota, and right-aligned place', () => {
+  it('renders context meter, cost, cache reuse, active model quota (5h then weekly), and right-aligned place', () => {
     const out = stripAnsi(renderFooter(samplePayload(), { home: '/home/xarillian', branch: 'main' }))
     assert.match(out, /^▰▰▱▱▱▱▱▱▱▱ 24%  \$0\.42  ◈ 25%  ◆ 81% 94%\s+~\/\.agents · main · Gemini 4 Neon \(High\)$/)
+  })
+
+  it('shows 3p quota buckets instead of gemini buckets when running a Claude or GPT model', () => {
+    const out = stripAnsi(renderFooter(samplePayload({
+      model: { id: 'claude-opus-5-5-high', display_name: 'Claude Opus 5.5 (High)' },
+      quota: {
+        '3p-weekly': { remaining_fraction: 0.88, reset_in_seconds: 0 },
+        '3p-5h': { remaining_fraction: 0.45, reset_in_seconds: 9000 },
+        'gemini-5h': { remaining_fraction: 0.99, reset_in_seconds: 12000 },
+        'gemini-weekly': { remaining_fraction: 0.99, reset_in_seconds: 500000 },
+      },
+    }), { home: '/home/xarillian', branch: 'main' }))
+    assert.ok(out.includes('◆ 45% 88%'))
+    assert.ok(!out.includes('99%'))
   })
 
   it('handles a fresh session before the first response', () => {

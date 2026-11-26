@@ -40,7 +40,7 @@ function fittingFigures(payload, width) {
   const context = `${meter(percent, tint)} ${value}`
   const cost = formatCost(payload.cost)
   const cache = formatCache(payload.context_window?.current_usage)
-  const quota = formatQuota(payload.quota)
+  const quota = formatQuota(payload.quota, payload.model)
 
   const candidates = [
     [context, cost, cache, quota],
@@ -80,14 +80,29 @@ function formatCache(usage) {
   return `${muted('◈ ')}${accent(`${Math.round((read / prompt) * 100)}%`)}`
 }
 
-function formatQuota(quota) {
-  if (!quota || typeof quota !== 'object') return null
-  const active = Object.values(quota)
-    .filter(bucket => bucket && !bucket.disabled && Number.isFinite(bucket.remaining_fraction))
-    .sort((a, b) => (a.reset_in_seconds ?? Infinity) - (b.reset_in_seconds ?? Infinity))
-  if (active.length === 0) return null
+function quotaPool(model) {
+  const name = `${model?.id ?? ''} ${model?.display_name ?? ''}`.toLowerCase()
+  if (!name.trim()) return null
+  return /\b(claude|gpt)\b/.test(name) ? '3p' : 'gemini'
+}
 
-  const left = active.map(bucket => `${Math.round(clamp(bucket.remaining_fraction * 100, 0, 100))}%`)
+const windowRank = id => (/(^|-)5h$/.test(id) ? 0 : /(^|-)weekly$/.test(id) ? 1 : 2)
+
+function formatQuota(quota, model) {
+  if (!quota || typeof quota !== 'object') return null
+  const entries = Object.entries(quota)
+    .filter(([, bucket]) => bucket && !bucket.disabled && Number.isFinite(bucket.remaining_fraction))
+  if (entries.length === 0) return null
+
+  const pool = quotaPool(model)
+  const poolMatches = pool ? entries.filter(([id]) => id.startsWith(`${pool}-`)) : []
+  const shown = (poolMatches.length > 0 ? poolMatches : entries).sort(([idA, a], [idB, b]) =>
+    windowRank(idA) - windowRank(idB)
+    || ((a.reset_in_seconds || Infinity) - (b.reset_in_seconds || Infinity))
+    || idA.localeCompare(idB),
+  )
+
+  const left = shown.map(([, bucket]) => `${Math.round(clamp(bucket.remaining_fraction * 100, 0, 100))}%`)
   return warning(`◆ ${left.join(' ')}`)
 }
 
