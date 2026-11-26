@@ -110,7 +110,6 @@
     "clangd-lsp@claude-plugins-official": true,
     "superpowers@claude-plugins-official": false,
     "skill-creator@claude-plugins-official": true,
-    "review@xarillian-agents": true,
     "quote@xarillian-agents": true,
     "cc-plugin-you-should-know@builtin": true,
     "footer@xarillian-agents": true,

@@ -9,21 +9,6 @@
   },
   "plugins": [
     {
-      "name": "review",
-      "description": "Review code with focused, evidence-based subagents.",
-      "source": "./harnesses/claude/plugins/review",
-      "version": "0.1.0",
-      "author": {
-        "name": "Austin Wayne"
-      },
-      "category": "development",
-      "keywords": [
-        "code-review",
-        "review",
-        "quality"
-      ]
-    },
-    {
       "name": "quote",
       "description": "Highlight text, click Quote, and reply to it as a thread.",
       "source": "./harnesses/claude/plugins/quote",
