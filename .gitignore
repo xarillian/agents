@@ -22,3 +22,4 @@ harnesses/claude/plugins/*/tsconfig.json
 
 # Herdr's mod runtime writes one into each mod folder
 harnesses/herdr/mods/*/jsconfig.json
+harnesses/herdr/mods/*/gpui-kit.d.ts
