@@ -68,7 +68,7 @@ Do what, other than you or me, would show the result is right; that is the bar f
 - Time zone: `America/Regina`.
 
 ## Useful CLI Tools
-`rg`, `tmux`, `fd`, `bat`, `eza`, `fzf`, `jq`, `git-delta`, `tldr`, `tree`, `less`, `nvtop`, `fnm`, `watchexec`, `entr`, `yq`, `lazygit`, `zoxide`, `gh`, `httpie`, `curlie`, `rsync`, `ffmpeg`
+`rg`, `tmux`, `fd`, `bat`, `eza`, `fzf`, `jq`, `git-delta`, `tldr`, `tree`, `less`, `nvtop`, `fnm`, `watchexec`, `entr`, `yq`, `lazygit`, `zoxide`, `gh`, `httpie`, `curlie`, `rsync`, `aria2c`, `ffmpeg`
 
 - `rg -h` opens Ripgrep help; it is not Grep's `-h` / `--no-filename`. 
 - Use `rg --no-filename` when suppressing filenames.
