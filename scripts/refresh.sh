@@ -273,5 +273,7 @@ link_folders "$BUILD/antigravity/commands" ~/.gemini/config/skills
 # symlinked files, so a mod made of links would never hot-reload.
 HERDR_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/herdr-app"
 link_config_tree "$REPO/harnesses/herdr/config" "$HERDR_HOME"
+prune_repo_links "$HERDR_HOME" "$REPO/profiles"
+[[ -d "$REPO/profiles/$PROFILE/herdr" ]] && link_config_tree "$REPO/profiles/$PROFILE/herdr" "$HERDR_HOME"
 prune_repo_links "$HERDR_HOME/mods" "$REPO/harnesses/herdr/mods"
 link_folders "$REPO/harnesses/herdr/mods" "$HERDR_HOME/mods"
