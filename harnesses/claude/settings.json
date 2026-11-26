@@ -50,7 +50,7 @@
       "mcp__plugin_andgo-company_slack__slack_search_public_and_private"
     ]
   },
-  "model": "fable",
+  "model": "claude-opus-5-5",
   "hooks": {
     "SessionStart": [
       {
