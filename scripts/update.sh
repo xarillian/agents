@@ -10,9 +10,11 @@ shift 2
 
 require_command pi
 require_command claude
+require_command agy
 
 pi update --all
 claude update
+agy update
 claude plugin marketplace update
 
 claude plugin list --json |

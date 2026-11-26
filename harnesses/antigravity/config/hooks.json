@@ -1,0 +1,34 @@
+{
+  "warn-on-drift": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "\"$HOME/.agents/hooks/warn-on-drift.sh\" --antigravity",
+        "timeout": 10
+      }
+    ]
+  },
+  "herdr-context": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "\"$HOME/.agents/hooks/herdr-context.sh\" --antigravity",
+        "timeout": 5
+      }
+    ]
+  },
+  "log-skill-use": {
+    "PostToolUse": [
+      {
+        "matcher": "read_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.agents/hooks/log-skill-use.sh\" --antigravity",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

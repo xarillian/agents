@@ -99,6 +99,43 @@ strip_frontmatter() {
     awk 'NR == 1 && /^---$/ { front = 1; next } front && /^---$/ { front = 0; next } !front' "$1"
 }
 
+# Antigravity only inlines `@[label](path)` includes; bare `@path` stays a reference.
+build_antigravity_agents() {
+    awk '
+        /^@[^[:space:]]+$/ {
+            path = substr($0, 2)
+            label = path
+            sub(/^.*\//, "", label)
+            sub(/\.[^.]+$/, "", label)
+            printf "@[%s](%s)\n", label, path
+            next
+        }
+        { print }
+    ' "$1"
+}
+
+# Antigravity exposes skills as slash commands; commands/*.md omit `name:`.
+build_antigravity_commands() {
+    local destination="$1"
+    local command
+    local name
+
+    rm -rf "$destination"
+    mkdir -p "$destination"
+    for command in "$REPO"/commands/*.md; do
+        [[ -f "$command" ]] || continue
+        name="$(basename "$command" .md)"
+        mkdir -p "$destination/$name"
+        awk -v name="$name" '
+            NR == 1 && /^---$/ { in_fm = 1; print; next }
+            in_fm && /^name:/ { has_name = 1 }
+            in_fm && /^---$/ { if (!has_name) print "name: " name; in_fm = 0 }
+            { print }
+        ' "$command" > "$destination/$name/SKILL.md"
+    done
+    return 0
+}
+
 # `pi install` rewrites every matching entry's spelling, so packages already
 # listed are left alone to keep settings.json from churning on each refresh.
 pi_package_installed() {
@@ -184,10 +221,12 @@ require_command pi
 require_command claude
 require_command jq
 
-mkdir -p "$BUILD"
+mkdir -p "$BUILD" "$BUILD/antigravity"
 strip_frontmatter "$REPO/AGENTS.base.md" > "$BUILD/AGENTS.md"
 rm -f "$BUILD/host-context.md"
 ln -s "$REPO/profiles/$PROFILE/host-context.md" "$BUILD/host-context.md"
+build_antigravity_agents "$BUILD/AGENTS.md" > "$BUILD/antigravity/AGENTS.md"
+build_antigravity_commands "$BUILD/antigravity/commands"
 
 link_config_tree "$REPO/harnesses/pi/config" "$HOME/.pi" .json
 mkdir -p ~/.pi/agent/packages
@@ -211,14 +250,23 @@ link_commands ~/.claude/commands
 add_claude_marketplaces
 install_claude_plugins
 
-for skills in ~/.claude/skills ~/.pi/agent/skills; do
+# Linked beside what Antigravity writes there itself (config.json, projects/).
+mkdir -p ~/.gemini/config ~/.gemini/antigravity-cli
+rm -f ~/.gemini/AGENTS.md ~/.gemini/antigravity-cli/statusline.sh
+ln -s "$BUILD/antigravity/AGENTS.md" ~/.gemini/AGENTS.md
+ln -s "$REPO/harnesses/antigravity/footer/footer.mjs" ~/.gemini/antigravity-cli/statusline.sh
+link_config_tree "$REPO/harnesses/antigravity/config" ~/.gemini/config
+
+for skills in ~/.claude/skills ~/.pi/agent/skills ~/.gemini/config/skills; do
     prune_repo_links "$skills" "$REPO/skills"
     prune_repo_links "$skills" "$REPO/profiles"
 done
+prune_repo_links ~/.gemini/config/skills "$BUILD/antigravity/commands"
 
 # pi already reads ~/.agents/skills itself.
-link_folders "$REPO/skills" ~/.claude/skills
-link_folders "$REPO/profiles/$PROFILE/skills" ~/.claude/skills ~/.pi/agent/skills
+link_folders "$REPO/skills" ~/.claude/skills ~/.gemini/config/skills
+link_folders "$REPO/profiles/$PROFILE/skills" ~/.claude/skills ~/.pi/agent/skills ~/.gemini/config/skills
+link_folders "$BUILD/antigravity/commands" ~/.gemini/config/skills
 
 # Linked beside what Herdr writes there itself (shipped layouts, mods and
 # themes, click state). Mods are linked whole: Herdr's reload watch skips

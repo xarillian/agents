@@ -1,5 +1,5 @@
 # Agent Harnesses
-Personal setup for `pi` or Claude Code depending on the machine.
+Personal setup for `pi`, Claude Code, and Antigravity depending on the machine.
 
 This repo contains setup and update scripts for those harnesses, links 'em to their appropriate dirs, and generated instructions. Bespoke packages for `pi` and plugins for the chassis are stored here, as well.
 
@@ -16,7 +16,7 @@ cd ~/.agents
 
 ## Source of Truth
 
-`~/.agents` is king. `~/.pi`, `~/.claude` and `~/.config/herdr-app` hold links and generated output; when they disagree with this repo, they are wrong.
+`~/.agents` is king. `~/.pi`, `~/.claude`, `~/.gemini` and `~/.config/herdr-app` hold links and generated output; when they disagree with this repo, they are wrong.
 
 ## Repo Map
 
@@ -26,6 +26,7 @@ commands/     Slash commands shared by every harness
 hooks/        Scripts that harness hooks run
 skills/       Skills shared by every harness
 harnesses/    What belongs to one harness:
+  antigravity/  config/ (mirrors ~/.gemini/config) and footer/ (CLI statusline)
   claude/       settings.json (linked to ~/.claude) and plugins/
   pi/           config/ (mirrors ~/.pi) and packages/
   herdr/        config/ (mirrors ~/.config/herdr-app) and mods/, for the Herdr app
