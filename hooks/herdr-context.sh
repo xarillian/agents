@@ -1,6 +1,6 @@
 #!/bin/sh
-# Tells an agent started inside Herdr how to delegate so its sub-agents show
-# up there. Outside Herdr it says nothing, so other sessions pay no context.
+# Tells an agent started inside Herdr how to delegate so its sub-agents show up there.
+# Sessions outside Herdr exclude this context.
 [ -n "$HC_TERMINAL_ID" ] || exit 0
 
 context=$(cat <<EOF
