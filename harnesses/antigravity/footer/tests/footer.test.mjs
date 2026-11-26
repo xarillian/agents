@@ -1,9 +1,12 @@
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
+import { mkdtempSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, it } from 'node:test'
 
-import { renderFooter } from '../footer.mjs'
+import { cooldownReport, renderFooter, syncHerdrCooldown } from '../footer.mjs'
 
 const stripAnsi = text => text.replace(/\x1b\[[0-9;]*m/g, '')
 
@@ -92,5 +95,92 @@ describe('antigravity footer', () => {
     })
     assert.ok(stripAnsi(stdout).includes('▰▰▱▱▱▱▱▱▱▱ 24%'))
     assert.ok(stripAnsi(stdout).includes('$0.42'))
+  })
+})
+
+describe('antigravity Herdr cooldown reporting', () => {
+  const NOW = 1_795_728_000_000
+
+  it('picks the latest reset among exhausted buckets in the active model pool', () => {
+    const report = cooldownReport(samplePayload({
+      quota: {
+        'gemini-5h': { remaining_fraction: 0, reset_in_seconds: 3_600 },
+        'gemini-weekly': { remaining_fraction: 0, reset_in_seconds: 86_400 },
+        '3p-5h': { remaining_fraction: 1, reset_in_seconds: 0 },
+      },
+    }), NOW)
+    assert.deepEqual(report, {
+      pool: 'antigravity/gemini',
+      checked: true,
+      resetAt: NOW + 86_400_000,
+    })
+  })
+
+  it('ignores exhausted buckets from the inactive pool or disabled buckets', () => {
+    const report = cooldownReport(samplePayload({
+      quota: {
+        'gemini-5h': { remaining_fraction: 0.5, reset_in_seconds: 3_600 },
+        'gemini-disabled': { remaining_fraction: 0, reset_in_seconds: 9_000, disabled: true },
+        '3p-5h': { remaining_fraction: 0, reset_in_seconds: 7_200 },
+      },
+    }), NOW)
+    assert.deepEqual(report, {
+      pool: 'antigravity/gemini',
+      checked: true,
+      resetAt: 0,
+    })
+  })
+
+  it('marks quota unchecked when the payload has no active-pool buckets', () => {
+    const report = cooldownReport({ model: { id: 'Gemini 4 Neon' } }, NOW)
+    assert.deepEqual(report, { pool: 'antigravity/gemini', checked: false, resetAt: 0 })
+  })
+
+  it('publishes Herdr labels on state transitions and suppresses jitter duplicates', () => {
+    const cacheDir = mkdtempSync(join(tmpdir(), 'agy-footer-test-'))
+    const calls = []
+    const runHc = args => calls.push(args)
+    const env = { HC_TERMINAL_ID: 't13' }
+
+    try {
+      const exhausted = samplePayload({
+        quota: { 'gemini-5h': { remaining_fraction: 0, reset_in_seconds: 7_200 } },
+      })
+      assert.equal(syncHerdrCooldown(exhausted, { env, now: NOW, cacheDir, runHc }), true)
+      assert.deepEqual(calls.at(-1), [
+        'label', 't13',
+        'usage.pool=antigravity/gemini',
+        `usage.cooldown=${NOW + 7_200_000}`,
+        `usage.at=${NOW}`,
+      ])
+
+      // 2 seconds later, reset_in_seconds ticks down by 2s (within 60s drift): no hc spam.
+      const ticked = samplePayload({
+        quota: { 'gemini-5h': { remaining_fraction: 0, reset_in_seconds: 7_198 } },
+      })
+      assert.equal(syncHerdrCooldown(ticked, { env, now: NOW + 2_000, cacheDir, runHc }), false)
+      assert.equal(calls.length, 1)
+
+      // Switching to a 3p model with quota immediately publishes the new pool and clears cooldown.
+      const switched = samplePayload({
+        model: { id: 'claude-opus-5-5-high', display_name: 'Claude Opus 5.5' },
+        quota: { '3p-5h': { remaining_fraction: 0.7, reset_in_seconds: 5_000 } },
+      })
+      assert.equal(syncHerdrCooldown(switched, { env, now: NOW + 5_000, cacheDir, runHc }), true)
+      assert.deepEqual(calls.at(-1), [
+        'label', 't13',
+        'usage.pool=antigravity/3p',
+        'usage.cooldown=',
+        `usage.at=${NOW + 5_000}`,
+      ])
+    } finally {
+      rmSync(cacheDir, { recursive: true, force: true })
+    }
+  })
+
+  it('does nothing outside Herdr', () => {
+    const calls = []
+    assert.equal(syncHerdrCooldown(samplePayload(), { env: {}, runHc: args => calls.push(args) }), false)
+    assert.equal(calls.length, 0)
   })
 })

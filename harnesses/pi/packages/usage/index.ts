@@ -2,6 +2,7 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 import { type Component, Text } from "@earendil-works/pi-tui";
 import { createUsageStore } from "./store.ts";
 import { USAGE_REQUEST, USAGE_UPDATE } from "./footer.ts";
+import { createHerdrCooldownReporter } from "./herdr.ts";
 import {
 	type Provider,
 	type UsageSnapshot,
@@ -49,6 +50,7 @@ const framed = (body: Component, theme: Theme): Component => ({
 export default function (pi: ExtensionAPI) {
 	let session: ExtensionContext | undefined;
 	const store = createUsageStore(() => providerForModel(session?.model?.provider));
+	const herdr = createHerdrCooldownReporter();
 
 	pi.registerEntryRenderer<UsageEntry>("usage", (entry, _options, theme) => {
 		const snapshot = entry.data?.snapshot;
@@ -66,6 +68,7 @@ export default function (pi: ExtensionAPI) {
 		if (!ctx?.hasUI) return;
 		const provider = providerForModel(ctx.model?.provider);
 		const result = provider ? store.result(provider) : undefined;
+		herdr.report(provider, result);
 		pi.events.emit(USAGE_UPDATE, result);
 		if (!provider || !result) {
 			ctx.ui.setStatus("usage", undefined);

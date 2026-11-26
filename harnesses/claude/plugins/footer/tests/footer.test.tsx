@@ -20,7 +20,7 @@ const request = (uncached: number, read: number, written: number): TurnUsage => 
 })
 
 /** Stands in for the engine: its own hint line, the session's figures, git, and the model. */
-function standInForEngine(on: On) {
+function standInForEngine(on: On, options: { env?: Record<string, string>; commands?: string[][] } = {}) {
   const world: World = {
     usage: { startedAt: 0, context: { tokens: 84250, window: 200000, percent: 42 }, rateLimits: [], cost: { usd: 1.2345 } },
     branch: 'main',
@@ -28,16 +28,19 @@ function standInForEngine(on: On) {
     clock: mock.clock(on, { now: NOW }),
   }
 
-  mock.env(on, { HOME: '/home/xarillian' })
+  mock.env(on, { HOME: '/home/xarillian', ...options.env })
   on('session.start', ($, e) => ({ cwd: e.cwd }))
   on('session.end', ($, e) => ({ sessionId: e.sessionId }))
   on('command.register', ($, e) => ({ value: { command: e.name } }))
   on('session.cwd', () => ({ value: '/home/xarillian/.agents' }))
   on('session.model', () => ({ value: 'claude-opus-5-5' }))
   on('session.usage', () => ({ value: world.usage }))
-  on('process.run', () => ({
-    value: { exitCode: 0, stdout: `${world.branch}\n`, stderr: '', isStdoutTruncated: false, isStderrTruncated: false },
-  }))
+  on('process.run', (_$, e) => {
+    options.commands?.push([...e.argv])
+    return {
+      value: { exitCode: 0, stdout: e.argv[0] === 'git' ? `${world.branch}\n` : '', stderr: '', isStdoutTruncated: false, isStderrTruncated: false },
+    }
+  })
   on('turn.step', async function* ($, e) {
     return { turnId: e.turnId, index: e.index, answer: '', toolUses: [], stopReason: 'end_turn', usage: world.nextRequest }
   })
@@ -218,5 +221,27 @@ describe('the cache card', () => {
     await typeCommand($, 'cache-history')
 
     expect(await footerOn($, 'terminal')).not.toContain('pinned')
+  })
+})
+
+describe('Herdr cooldown reporting', () => {
+  test('publishes cooldown labels when a rate-limit window is exhausted inside Herdr', async ($, on) => {
+    const commands: string[][] = []
+    const world = standInForEngine(on, { env: { HC_TERMINAL_ID: 't3' }, commands })
+
+    await $.session.start({ cwd: '/home/xarillian/.agents', surface: 'terminal', isInteractive: true })
+    const resetAt = inHours(2)
+    world.usage = {
+      ...world.usage,
+      rateLimits: [{ kind: 'five_hour', percentUsed: 100, resetsAt: resetAt }],
+    }
+
+    await footerOn($, 'terminal')
+    await footerOn($, 'terminal')
+
+    const hcCalls = commands.filter(argv => argv[0] === 'hc')
+    expect(hcCalls).toEqual([
+      ['hc', 'label', 't3', 'usage.pool=claude', `usage.cooldown=${Date.parse(resetAt)}`, `usage.at=${NOW}`],
+    ])
   })
 })

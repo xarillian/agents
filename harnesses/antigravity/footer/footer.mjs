@@ -2,7 +2,9 @@
 // Resource-aware statusline for Antigravity CLI, matching the Claude and Pi footers.
 
 import { execFileSync } from 'node:child_process'
-import { readFileSync, realpathSync } from 'node:fs'
+import { readFileSync, realpathSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const PART_GAP = 2
@@ -156,6 +158,87 @@ function isDirectRun() {
   }
 }
 
+const COOLDOWN_DRIFT_MS = 60_000
+const COOLDOWN_HEARTBEAT_MS = 300_000
+
+function activeQuotaEntries(quota, model) {
+  if (!quota || typeof quota !== 'object') return { pool: quotaPool(model), entries: [] }
+  const valid = Object.entries(quota)
+    .filter(([, bucket]) => bucket && !bucket.disabled && Number.isFinite(bucket.remaining_fraction))
+  const pool = quotaPool(model)
+  if (!pool) return { pool: null, entries: valid }
+  return { pool, entries: valid.filter(([id]) => id.startsWith(`${pool}-`)) }
+}
+
+export function cooldownReport(payload = {}, now = Date.now()) {
+  const { pool, entries } = activeQuotaEntries(payload.quota, payload.model)
+  const poolName = pool ? `antigravity/${pool}` : null
+  if (entries.length === 0) return { pool: poolName, checked: false, resetAt: 0 }
+
+  const exhausted = entries
+    .map(([, bucket]) => bucket)
+    .filter(bucket => bucket.remaining_fraction <= 0 && Number.isFinite(bucket.reset_in_seconds) && bucket.reset_in_seconds > 0)
+    .map(bucket => Math.round(now + bucket.reset_in_seconds * 1000))
+
+  return {
+    pool: poolName,
+    checked: true,
+    resetAt: exhausted.length > 0 ? Math.max(...exhausted) : 0,
+  }
+}
+
+export function syncHerdrCooldown(payload = {}, options = {}) {
+  const env = options.env ?? process.env
+  const terminalId = env.HC_TERMINAL_ID?.trim()
+  if (!terminalId) return false
+
+  const now = options.now ?? Date.now()
+  const report = cooldownReport(payload, now)
+  if (!report.pool && !report.checked) return false
+
+  const cachePath = join(options.cacheDir ?? tmpdir(), `herdr-usage-${terminalId.replace(/[^a-zA-Z0-9_.-]/g, '_')}.json`)
+  const prev = readCache(cachePath)
+  if (!shouldPublishCooldown(prev, report, now)) return false
+
+  const args = ['label', terminalId]
+  if (report.pool) args.push(`usage.pool=${report.pool}`)
+  if (report.checked) {
+    args.push(`usage.cooldown=${report.resetAt > 0 ? String(report.resetAt) : ''}`)
+    args.push(`usage.at=${String(now)}`)
+  }
+
+  const runHc = options.runHc ?? defaultRunHc
+  try {
+    runHc(args)
+    writeFileSync(cachePath, JSON.stringify({ ...report, at: now }))
+    return true
+  } catch {
+    return false
+  }
+}
+
+function shouldPublishCooldown(prev, next, now) {
+  if (!prev) return true
+  if (prev.pool !== next.pool) return true
+  if (!next.checked) return false
+  if (!prev.checked) return true
+  if ((prev.resetAt > 0) !== (next.resetAt > 0)) return true
+  if (next.resetAt > 0 && Math.abs(next.resetAt - prev.resetAt) >= COOLDOWN_DRIFT_MS) return true
+  return now - (prev.at ?? 0) >= COOLDOWN_HEARTBEAT_MS
+}
+
+function readCache(path) {
+  try {
+    return JSON.parse(readFileSync(path, 'utf8'))
+  } catch {
+    return null
+  }
+}
+
+function defaultRunHc(args) {
+  execFileSync('hc', args, { timeout: 500, stdio: ['ignore', 'ignore', 'ignore'] })
+}
+
 if (isDirectRun()) {
   let payload = {}
   try {
@@ -165,6 +248,7 @@ if (isDirectRun()) {
     payload = {}
   }
 
+  syncHerdrCooldown(payload)
   const dir = payload.workspace?.current_dir || payload.cwd
   const branch = payload.vcs?.type === 'git' ? gitBranch(dir) : null
   process.stdout.write(`${renderFooter(payload, { home: process.env.HOME, branch })}\n`)

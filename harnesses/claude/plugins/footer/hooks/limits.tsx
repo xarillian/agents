@@ -20,6 +20,16 @@ export function remaining({ percentUsed }: SessionRateLimit): number {
   return Math.round(100 - Math.max(0, Math.min(100, percentUsed)))
 }
 
+/** Latest reset timestamp among exhausted windows, 0 when usage remains, or undefined when limits are unknown. */
+export function cooldownResetAt(limits: readonly SessionRateLimit[], now: number): number | undefined {
+  if (limits.length === 0) return undefined
+  const exhausted = limits
+    .filter(limit => limit.percentUsed >= 100 && limit.resetsAt !== undefined)
+    .map(limit => Date.parse(limit.resetsAt!))
+    .filter(resetAt => Number.isFinite(resetAt) && resetAt > now)
+  return exhausted.length > 0 ? Math.max(...exhausted) : 0
+}
+
 export function limitsCard(table: Table, limits: readonly SessionRateLimit[], now: number) {
   const windows = shortestFirst(limits)
   const labelWidth = Math.max(...windows.map(limit => label(limit.kind).length))

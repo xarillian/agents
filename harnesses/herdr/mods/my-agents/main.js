@@ -2,7 +2,8 @@
 
 import { View, div, image, svg } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
-import { agents, terminals, panes, focused, spaces, run, hc, exec, home, readTextFile, theme, shared, setShared, setAgentOrder, openOverlay, closeOverlay, props, window, layout } from "herdr";
+import { agents, terminals, panes, focused, spaces, run, hc, exec, home, checking, readTextFile, theme, shared, setShared, setAgentOrder, openOverlay, closeOverlay, props, window, layout } from "herdr";
+import { claudeResetFromUsage, cooldownFor, cooldownTooltip, mergePoolUsage } from "./cooldown.js";
 
 function find(node, id) {
   if (node?.id === id) return node;
@@ -91,6 +92,41 @@ function duration(ms) {
   return h < 24 ? `${h}h` : `${Math.floor(h / 24)}d`;
 }
 
+const CLAUDE_POLL_MS = 120_000;
+
+async function readClaudeOAuthToken(now) {
+  try {
+    const raw = await readTextFile(`${home()}/.claude/.credentials.json`);
+    const oauth = raw ? JSON.parse(raw)?.claudeAiOauth : null;
+    if (oauth?.accessToken && (oauth.expiresAt === undefined || oauth.expiresAt > now)) return oauth.accessToken;
+  } catch {}
+  try {
+    const raw = await readTextFile(`${home()}/.pi/agent/auth.json`);
+    const oauth = raw ? JSON.parse(raw)?.anthropic : null;
+    if (oauth?.type === "oauth" && oauth.access && oauth.expires > now) return oauth.access;
+  } catch {}
+  return null;
+}
+
+async function fetchClaudeCooldown(now) {
+  const token = await readClaudeOAuthToken(now);
+  if (!token) return null;
+  try {
+    const res = await fetch("https://api.anthropic.com/api/oauth/usage", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+        "anthropic-beta": "oauth-2025-04-20",
+      },
+    });
+    if (!res.ok) return null;
+    return claudeResetFromUsage(await res.json(), now);
+  } catch {
+    return null;
+  }
+}
+
 // The agent's icon from the app's program table: a one-color glyph or a picture.
 function icon(p, size, color) {
   if (!p?.icon) return null;
@@ -109,7 +145,37 @@ export default class Agents extends View {
     if (!Array.isArray(this.pendingPins)) this.pendingPins = [];
     if (!this.pendingPins.length) localStorage.removeItem("pins");
     this.migratingPins = new Set();
+    try { this.pools = JSON.parse(localStorage.getItem("usagePools") ?? "{}"); } catch { this.pools = {}; }
+    if (!this.pools || typeof this.pools !== "object" || Array.isArray(this.pools)) this.pools = {};
+    this.claudePollAt = 0;
+    this.pollingClaude = false;
     cx.timer.every(30000, (cx) => cx.notify());
+  }
+
+  syncUsage(list, all, now, cx) {
+    if (mergePoolUsage(this.pools, all, now)) {
+      localStorage.setItem("usagePools", JSON.stringify(this.pools));
+    }
+    if (checking() || window()?.visible === false || this.pollingClaude) return;
+    if (!list.some((a) => a.app === "claude-code" && !a.address.includes("/"))) return;
+    const claudeEntry = this.pools[":claude"];
+    if (now - this.claudePollAt < CLAUDE_POLL_MS || (claudeEntry && now - claudeEntry.at < CLAUDE_POLL_MS)) return;
+    this.claudePollAt = now;
+    this.pollingClaude = true;
+    cx.spawn(async (cx) => {
+      try {
+        const result = await fetchClaudeCooldown(Date.now());
+        if (!result?.checked) return;
+        const at = Date.now();
+        if (!this.pools[":claude"] || at >= this.pools[":claude"].at) {
+          this.pools[":claude"] = { resetAt: result.resetAt, at };
+          localStorage.setItem("usagePools", JSON.stringify(this.pools));
+          cx.notify();
+        }
+      } finally {
+        this.pollingClaude = false;
+      }
+    });
   }
 
   // Stamps agents whose state changed. Done and idle count as one: looking at a
@@ -262,7 +328,22 @@ export default class Agents extends View {
         .when(l === "└" || l === "├", el => el.border_b(1.5).rounded_bl(6))))
       .when(Boolean(pic), el => el.child(div().mr(8).child(pic)))
       .child(div().flex_1().truncate().text_color(on ? t.foreground : t.muted).child(k.name || k.template || k.program?.name || k.address))
-      .child(this.status(t, { status: st }, compact));
+      .child(this.status(t, { address: k.address, app: k.status?.app ?? null, status: st }, compact));
+  }
+
+  // An agent whose active quota pool is exhausted; hovering tells when it resets.
+  cooldown(t, a, resetAt, recap = null) {
+    return div()
+      .id(`cooldown-${a.address}`)
+      .w(14)
+      .h(18)
+      .flex_none()
+      .flex()
+      .items_center()
+      .justify_center()
+      .text_color(t.blocked)
+      .tooltip(cooldownTooltip(resetAt, this.now, recap))
+      .child(svg("mods/my-agents/cooldown.svg").size(12));
   }
 
   // A TODO's mark. With a recap to read it takes the accent, and hovering it tells the recap.
@@ -275,7 +356,23 @@ export default class Agents extends View {
   }
 
   // compact: a ! for blocked where a header already says "Needs you".
-  status(t, a, compact = false) {
+  // singleSlot: collapsed rail only fits one 14px icon, so TODO+cooldown combines tooltips there.
+  status(t, a, compact = false, singleSlot = false) {
+    if (a.address) {
+      const resetAt = cooldownFor(a, this.terminalsByAddress?.get(a.address), this.pools, this.now);
+      if (resetAt) {
+        if (this.isTodo(a)) {
+          if (singleSlot) return this.cooldown(t, a, resetAt, this.recaps.get(a.address));
+          return h_flex()
+            .flex_none()
+            .items_center()
+            .gap(4)
+            .child(this.bookmark(t, a))
+            .child(this.cooldown(t, a, resetAt));
+        }
+        return this.cooldown(t, a, resetAt);
+      }
+    }
     const color = t[a.status] ?? t.dim;
     if (a.status === "working") return svg("mods/workspace-chrome/spinner.svg").size(12).mx(1).flex_none().text_color(t.working).spin(900);
     if (a.status === "blocked" && compact) return div().size(14).flex_none().rounded(4).bg(t.blocked + "26").text_size(10.5).font_bold().text_color(t.blocked).flex().items_center().justify_center().child("!");
@@ -298,7 +395,10 @@ export default class Agents extends View {
     this.todo = new Set(all.filter((k) => k.labels?.todo).map((k) => k.address));
     const shown = focused()?.agent;
     const now = Date.now();
+    this.now = now;
+    this.terminalsByAddress = new Map(all.map((k) => [k.address, k]));
     this.track(list, now);
+    this.syncUsage(list, all, now, cx);
     this.remember(list, all, cx);
     // A kept sub-agent (one with a pane) is in agents() too: where a tree shows
     // it, it gets no row of its own, unless it's pinned.
@@ -388,7 +488,7 @@ export default class Agents extends View {
           .hover((s) => s.bg(t.hover))
           .on_click(() => run("pane.focus", { pane: a.pane }))
           .child(div().flex_1().min_w(0).whitespace_nowrap().text_right().text_color(a.focused ? t.foreground : t.muted).child(String(i + 1)))
-          .child(h_flex().w(14).flex_none().items_center().justify_center().child(this.status(t, a, true)));
+          .child(h_flex().w(14).flex_none().items_center().justify_center().child(this.status(t, a, true, true)));
       }
       const when = this.since(a);
       const idle = a.status === "idle" && !a.focused;
