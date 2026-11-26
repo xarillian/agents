@@ -16,7 +16,7 @@ cd ~/.agents
 
 ## Source of Truth
 
-`~/.agents` is king. `~/.pi` and `~/.claude` hold links and generated output; when they disagree with this repo, they are wrong.
+`~/.agents` is king. `~/.pi`, `~/.claude` and `~/.config/herdr-app` hold links and generated output; when they disagree with this repo, they are wrong.
 
 ## Repo Map
 
@@ -28,6 +28,7 @@ skills/       Skills shared by every harness
 harnesses/    What belongs to one harness:
   claude/       settings.json (linked to ~/.claude) and plugins/
   pi/           config/ (mirrors ~/.pi) and packages/
+  herdr/        config/ (mirrors ~/.config/herdr-app) and mods/, for the Herdr app
 scripts/      setup.sh, update.sh, refresh.sh and their shared lib.sh
 profiles/     What differs per machine: host context, skills, skill usage log
 ```

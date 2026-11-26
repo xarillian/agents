@@ -58,21 +58,21 @@ link_config_tree() {
     return 0
 }
 
-link_skills() {
+link_folders() {
     local source="$1"
     shift
-    local skill
+    local folder
     local name
     local destination
 
     [[ -d "$source" ]] || return 0
-    for skill in "$source"/*; do
-        [[ -d "$skill" ]] || continue
-        name="$(basename "$skill")"
+    for folder in "$source"/*; do
+        [[ -d "$folder" ]] || continue
+        name="$(basename "$folder")"
         for destination in "$@"; do
             mkdir -p "$destination"
             rm -rf "${destination:?}/$name"
-            ln -s "$skill" "$destination/$name"
+            ln -s "$folder" "$destination/$name"
         done
     done
     return 0
@@ -217,5 +217,13 @@ for skills in ~/.claude/skills ~/.pi/agent/skills; do
 done
 
 # pi already reads ~/.agents/skills itself.
-link_skills "$REPO/skills" ~/.claude/skills
-link_skills "$REPO/profiles/$PROFILE/skills" ~/.claude/skills ~/.pi/agent/skills
+link_folders "$REPO/skills" ~/.claude/skills
+link_folders "$REPO/profiles/$PROFILE/skills" ~/.claude/skills ~/.pi/agent/skills
+
+# Linked beside what Herdr writes there itself (shipped layouts, mods and
+# themes, click state). Mods are linked whole: Herdr's reload watch skips
+# symlinked files, so a mod made of links would never hot-reload.
+HERDR_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/herdr-app"
+link_config_tree "$REPO/harnesses/herdr/config" "$HERDR_HOME"
+prune_repo_links "$HERDR_HOME/mods" "$REPO/harnesses/herdr/mods"
+link_folders "$REPO/harnesses/herdr/mods" "$HERDR_HOME/mods"

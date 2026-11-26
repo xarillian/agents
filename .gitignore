@@ -19,3 +19,6 @@ models-store.json
 # Claude Code lays these beside each mod it loads
 harnesses/claude/plugins/*/.claude-plugin/types/
 harnesses/claude/plugins/*/tsconfig.json
+
+# Herdr's mod runtime writes one into each mod folder
+harnesses/herdr/mods/*/jsconfig.json
