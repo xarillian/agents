@@ -126,3 +126,8 @@
 {"occurred_at":"2026-11-23T01:10:34-0600","skill":"mending","invoked_by":"model"}
 {"occurred_at":"2026-11-23T16:43:19-0600","skill":"mending","invoked_by":"model"}
 {"occurred_at":"2026-11-23T18:09:40-0600","skill":"truesight","invoked_by":"model"}
+{"occurred_at":"2026-11-26T12:58:17-0600","skill":"unslop","invoked_by":"model"}
+{"occurred_at":"2026-11-26T13:09:14-0600","skill":"mending","invoked_by":"model"}
+{"occurred_at":"2026-11-26T13:12:40-0600","skill":"mending","invoked_by":"model"}
+{"occurred_at":"2026-11-26T14:48:10-0600","skill":"truesight","invoked_by":"model"}
+{"occurred_at":"2026-11-26T14:48:36-0600","skill":"mending","invoked_by":"model"}
