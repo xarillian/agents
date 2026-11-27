@@ -239,6 +239,73 @@ function defaultRunHc(args) {
   execFileSync('hc', args, { timeout: 500, stdio: ['ignore', 'ignore', 'ignore'] })
 }
 
+function parsePbtxtTitle(raw) {
+  const match = raw.match(/(?:^|\s)title\s*:\s*"((?:\\.|[^"\\])*)"/)
+  if (!match) return ''
+  const unescaped = match[1].replace(/\\([\\"'nrt])/g, (_, ch) => (
+    ch === 'n' ? '\n' : ch === 'r' ? '\r' : ch === 't' ? '\t' : ch
+  ))
+  return singleLine(unescaped)
+}
+
+function readAnnotationTitle(payload, options = {}) {
+  const env = options.env ?? process.env
+  const id = String(
+    payload.conversation_id
+      || payload.session_id
+      || payload.conversationId
+      || payload.sessionId
+      || env.ANTIGRAVITY_CONVERSATION_ID
+      || '',
+  ).trim()
+  if (!id || id.includes('/') || id.includes('\\') || id.includes('..')) return ''
+
+  const transcript = payload.transcript_path ?? payload.transcriptPath
+  const transcriptDir = typeof transcript === 'string'
+    ? transcript.match(/^(.+)\/brain\/[^/]+\//)?.[1]
+    : null
+  const home = options.home ?? env.HOME
+  const candidates = [...new Set([
+    options.appDataDir,
+    env.ANTIGRAVITY_APP_DATA_DIR,
+    transcriptDir,
+    home && join(home, '.gemini', 'antigravity-cli'),
+    home && join(home, '.gemini', 'antigravity'),
+  ].filter(Boolean))]
+
+  for (const dir of candidates) {
+    try {
+      const title = parsePbtxtTitle(readFileSync(join(dir, 'annotations', `${id}.pbtxt`), 'utf8'))
+      if (title) return title
+    } catch {
+      // Try the next candidate app data directory.
+    }
+  }
+  return ''
+}
+
+export function syncHerdrTitle(payload = {}, options = {}) {
+  const env = options.env ?? process.env
+  const terminalId = env.HC_TERMINAL_ID?.trim()
+  if (!terminalId) return false
+
+  const direct = typeof payload.conversation_title === 'string' ? singleLine(payload.conversation_title) : ''
+  const title = direct || readAnnotationTitle(payload, options)
+  const cachePath = join(options.cacheDir ?? tmpdir(), `herdr-title-${terminalId.replace(/[^a-zA-Z0-9_.-]/g, '_')}.json`)
+  const prev = readCache(cachePath)
+  if (!prev && !title) return false
+  if (prev && prev.title === title) return false
+
+  const runHc = options.runHc ?? defaultRunHc
+  try {
+    runHc(['label', terminalId, `agent.title=${title}`])
+    writeFileSync(cachePath, JSON.stringify({ title }))
+    return true
+  } catch {
+    return false
+  }
+}
+
 if (isDirectRun()) {
   let payload = {}
   try {
@@ -248,8 +315,14 @@ if (isDirectRun()) {
     payload = {}
   }
 
-  syncHerdrCooldown(payload)
-  const dir = payload.workspace?.current_dir || payload.cwd
-  const branch = payload.vcs?.type === 'git' ? gitBranch(dir) : null
-  process.stdout.write(`${renderFooter(payload, { home: process.env.HOME, branch })}\n`)
+  if (process.argv.includes('--hook')) {
+    syncHerdrTitle(payload)
+    process.stdout.write(payload.hookEventName === 'Stop' ? '{"decision":"allow"}\n' : '{}\n')
+  } else {
+    syncHerdrCooldown(payload)
+    syncHerdrTitle(payload)
+    const dir = payload.workspace?.current_dir || payload.cwd
+    const branch = payload.vcs?.type === 'git' ? gitBranch(dir) : null
+    process.stdout.write(`${renderFooter(payload, { home: process.env.HOME, branch })}\n`)
+  }
 }

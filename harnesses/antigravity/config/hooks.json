@@ -30,5 +30,35 @@
         ]
       }
     ]
+  },
+  "herdr-title": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "\"$HOME/.agents/harnesses/antigravity/footer/footer.mjs\" --hook",
+        "timeout": 5
+      }
+    ],
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "\"$HOME/.agents/harnesses/antigravity/footer/footer.mjs\" --hook",
+        "timeout": 5
+      }
+    ],
+    "PostInvocation": [
+      {
+        "type": "command",
+        "command": "\"$HOME/.agents/harnesses/antigravity/footer/footer.mjs\" --hook",
+        "timeout": 5
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "\"$HOME/.agents/harnesses/antigravity/footer/footer.mjs\" --hook",
+        "timeout": 5
+      }
+    ]
   }
 }

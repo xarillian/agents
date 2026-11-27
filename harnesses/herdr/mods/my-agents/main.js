@@ -4,6 +4,7 @@ import { View, div, image, svg } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
 import { agents, terminals, panes, focused, spaces, run, hc, exec, home, checking, readTextFile, theme, shared, setShared, setAgentOrder, openOverlay, closeOverlay, props, window, layout } from "herdr";
 import { claudeResetFromUsage, cooldownFor, cooldownTooltip, mergePoolUsage } from "./cooldown.js";
+import { agentTitle, rowDisplay } from "./row.js";
 
 function find(node, id) {
   if (node?.id === id) return node;
@@ -26,12 +27,6 @@ function toggleSidebar() {
   run("layout.resize", { id: "sidebar", px: narrow() ? (shared("sidebar.width") ?? 268) : window()?.platform === "macos" ? 76 : 44 });
 }
 
-// Drops what an agent puts before its title: a status glyph or spinner and the separator
-// after it ("✦  Working", "⠋ - Thinking"), and Codex's blinking "[ ! ] " / "[ . ] " mark.
-// Stops at an opening bracket or quote, so a title that starts with one ("[web] login") keeps it,
-// and at an emoji ("🔴 login", "❤️ deploy"), except for known status marks.
-const clean = (s) => (s ?? "").replace(/^(?:\[ [!.] \] |[✋⏳]\uFE0F?(?=\s)|(?!(?:\p{Emoji}\uFE0F|[#*]\u20E3))[^\p{L}\p{N}\p{Ps}\p{Pi}\p{Emoji_Presentation}])+/u, "").trim();
-
 function leadPanes(all) {
   const leads = new Map();
   for (const p of all) {
@@ -41,16 +36,6 @@ function leadPanes(all) {
     if (!current || (!current.program?.agent && (p.program?.agent || (!current.focused && p.focused)))) leads.set(p.tab, p);
   }
   return leads;
-}
-
-function title(tab, l) {
-  const prog = l?.program?.name;
-  const live = clean(l?.title);
-  // clean() would strip a path's leading ~ or /: test the title with only its status glyph gone.
-  const path = /^[~/]|^[A-Za-z]:\\/.test((l?.title ?? "").replace(/^[^\p{L}\p{N}~/]+/u, ""));
-  const telling = live && live !== (l?.terminal ?? l?.address) && live !== prog && !path && !live.includes("@") && live.toLowerCase() !== l?.program?.key;
-  // The agent's own title outranks the tab's name, so a session renamed in the agent renames its row.
-  return telling ? live : tab.name;
 }
 const RANK = { blocked: 5, done: 4, working: 2, idle: 1 };
 // An idle agent marked as mine to pick up: below the news, above what runs on its own.
@@ -310,6 +295,8 @@ export default class Agents extends View {
     const st = kidStatus(k, this.listed);
     const pic = icon(k.program, 14, t.foreground);
     const on = k.address === shown;
+    const name = k.name || k.template || k.program?.name || k.address;
+    const showId = Boolean(k.address) && name !== k.address;
     return h_flex()
       .id(`sub-${k.address}`)
       .pl(39)
@@ -327,7 +314,8 @@ export default class Agents extends View {
         .when(Boolean(l), el => el.border_l(1.5).border_color(t.input))
         .when(l === "└" || l === "├", el => el.border_b(1.5).rounded_bl(6))))
       .when(Boolean(pic), el => el.child(div().mr(8).child(pic)))
-      .child(div().flex_1().truncate().text_color(on ? t.foreground : t.muted).child(k.name || k.template || k.program?.name || k.address))
+      .child(div().flex_1().min_w(0).truncate().text_color(on ? t.foreground : t.muted).child(name))
+      .when(showId, el => el.child(div().flex_none().mx(6).text_size(11).text_color(t.dim).child(k.address)))
       .child(this.status(t, { address: k.address, app: k.status?.app ?? null, status: st }, compact));
   }
 
@@ -450,30 +438,19 @@ export default class Agents extends View {
         .when(!open, (el) => el.child(String(subs.length)));
     };
 
-    // A row reads "space \u00b7 detail": the detail is a tab someone named or the
-    // agent's own title, never an automatic tab number unless two rows would
-    // otherwise read the same.
     // Read the pane snapshot once: every host read copies the whole list into JS.
     const leads = leadPanes(panes());
     const tabs = new Map(spaces().flatMap(s => s.tabs).map(tab => [tab.id, tab]));
     const labels = new Map(list.map(a => {
       const tab = tabs.get(a.tab);
       const many = tabCounts.get(a.tab) > 1;
-      return [a.address, tab ? title(tab, many ? a : leads.get(a.tab)) : (a.title || a.program?.name || "")];
+      const lead = many ? a : (leads.get(a.tab) ?? a);
+      return [a.address, agentTitle(tab, lead, this.terminalsByAddress.get(lead?.terminal ?? lead?.address))];
     }));
     const label = (a) => labels.get(a.address);
-    const detail = new Map(list.map(a => [a.address, /^\d+$/.test(label(a)) ? null : label(a)]));
-    const seen = {};
-    for (const a of list) { const k = `${a.space_name}\u0000${detail.get(a.address) ?? ""}`; seen[k] = (seen[k] ?? 0) + 1; }
-    for (const a of list) {
-      if (detail.get(a.address) == null && seen[`${a.space_name}\u0000`] > 1) detail.set(a.address, label(a));
-    }
 
     const row = (a, i, subs = []) => {
       const pic = icon(a.program, 16, t.foreground);
-      const more = detail.get(a.address);
-      // An agent on another machine (`vps/t7`) says which.
-      const machine = a.address.includes("/") ? a.address.split("/")[0] : null;
       if (collapsed) {
         return h_flex()
           .id(`ag-${a.address}`)
@@ -515,16 +492,11 @@ export default class Agents extends View {
         () => run("terminal.pin", { terminal: a.address, pinned: !isPinned }));
       const todo = hoverButton(`todo-${a.address}`, marked ? "circle-check" : "square", marked ? "Clear TODO" : "Mark as TODO",
         () => hc(["label", a.address, marked ? "todo=" : "todo=1"]));
-      // Under a space header the space goes without saying; an automatic tab number says nothing.
-      // Without a space header above (priority, pinned) the row names its space first, quietly;
-      // the session name carries the row, since many agents share one space.
-      const full = byPriority || isPinned;
-      const name = full ? more ?? (a.space_name || label(a)) : more ?? (/^\d+$/.test(label(a)) ? a.program?.name || label(a) : label(a));
-      const where = full && more ? a.space_name : null;
+      const { name, subtitle } = rowDisplay(a, label(a), { showSpace: byPriority || isPinned });
       return h_flex()
         .id(`ag-${a.address}`)
         .px(8)
-        .h(30)
+        .h(42)
         .flex_none()
         .rounded(8)
         .items_center()
@@ -545,10 +517,9 @@ export default class Agents extends View {
             this.folded.has(a.address) ? this.folded.delete(a.address) : this.folded.add(a.address);
             cx.notify();
           })).child(pic)))
-        .child(h_flex().flex_1().min_w(0).gap(5).items_center()
-          .when(Boolean(where), el => el.child(div().flex_none().max_w(90).truncate().text_color(t.dim).child(`${where} \u00b7`)))
-          .child(div().flex_1().min_w(0).truncate().text_color(idle ? t.muted : t.foreground).child(name)))
-        .when(Boolean(machine), el => el.child(div().text_size(10).text_color(t.dim).child(machine)))
+        .child(v_flex().flex_1().min_w(0).gap(2)
+          .child(div().truncate().text_size(13).line_height("16px").text_color(idle ? t.muted : t.foreground).child(name))
+          .when(Boolean(subtitle), el => el.child(div().truncate().text_size(11).line_height("14px").text_color(t.dim).child(subtitle))))
         .when(subs.length > 0, el => el.child(fold(a, subs)))
         .when(this.hovered === a.address, el => el.child(todo).child(pin))
         .when(this.hovered !== a.address && Boolean(when), el => el.child(div().flex_none().text_size(11).text_color(t.dim).child(duration(now - when))))

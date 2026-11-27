@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, it } from 'node:test'
 
-import { cooldownReport, renderFooter, syncHerdrCooldown } from '../footer.mjs'
+import { cooldownReport, renderFooter, syncHerdrCooldown, syncHerdrTitle } from '../footer.mjs'
 
 const stripAnsi = text => text.replace(/\x1b\[[0-9;]*m/g, '')
 
@@ -182,5 +182,132 @@ describe('antigravity Herdr cooldown reporting', () => {
     const calls = []
     assert.equal(syncHerdrCooldown(samplePayload(), { env: {}, runHc: args => calls.push(args) }), false)
     assert.equal(calls.length, 0)
+  })
+})
+
+describe('antigravity Herdr title reporting', () => {
+  it('skips untitled sessions, publishes titles once, updates on rename, and clears on reset', () => {
+    const cacheDir = mkdtempSync(join(tmpdir(), 'agy-title-test-'))
+    const calls = []
+    const runHc = args => calls.push(args)
+    const env = { HC_TERMINAL_ID: 't13' }
+
+    try {
+      assert.equal(syncHerdrTitle(samplePayload(), { env, cacheDir, runHc }), false)
+      assert.equal(syncHerdrTitle(samplePayload({ conversation_title: '   \n\t  ' }), { env, cacheDir, runHc }), false)
+      assert.equal(calls.length, 0)
+
+      assert.equal(
+        syncHerdrTitle(samplePayload({ conversation_title: 'Herdr\n  Sidebar   Agent IDs' }), { env, cacheDir, runHc }),
+        true,
+      )
+      assert.deepEqual(calls.at(-1), ['label', 't13', 'agent.title=Herdr Sidebar Agent IDs'])
+
+      assert.equal(
+        syncHerdrTitle(samplePayload({ conversation_title: 'Herdr Sidebar Agent IDs' }), { env, cacheDir, runHc }),
+        false,
+      )
+      assert.equal(calls.length, 1)
+
+      assert.equal(
+        syncHerdrTitle(samplePayload({ conversation_title: 'Renamed Thread' }), { env, cacheDir, runHc }),
+        true,
+      )
+      assert.deepEqual(calls.at(-1), ['label', 't13', 'agent.title=Renamed Thread'])
+
+      assert.equal(syncHerdrTitle(samplePayload({ conversation_title: '' }), { env, cacheDir, runHc }), true)
+      assert.deepEqual(calls.at(-1), ['label', 't13', 'agent.title='])
+
+      assert.equal(syncHerdrTitle(samplePayload(), { env, cacheDir, runHc }), false)
+      assert.equal(calls.length, 3)
+    } finally {
+      rmSync(cacheDir, { recursive: true, force: true })
+    }
+  })
+
+  it('does nothing outside Herdr', () => {
+    const calls = []
+    assert.equal(
+      syncHerdrTitle(samplePayload({ conversation_title: 'Ignored' }), { env: {}, runHc: args => calls.push(args) }),
+      false,
+    )
+    assert.equal(calls.length, 0)
+  })
+
+  it('falls back to annotations/<conversation_id>.pbtxt when conversation_title is omitted', () => {
+    const cacheDir = mkdtempSync(join(tmpdir(), 'agy-title-cache-'))
+    const appDataDir = mkdtempSync(join(tmpdir(), 'agy-app-data-'))
+    const calls = []
+    const runHc = args => calls.push(args)
+    const env = { HC_TERMINAL_ID: 't18' }
+    const convId = '13b7f061-8178-4e40-9a01-1c403487cb03'
+
+    try {
+      mkdirSync(join(appDataDir, 'annotations'), { recursive: true })
+      writeFileSync(
+        join(appDataDir, 'annotations', `${convId}.pbtxt`),
+        'title:"Fix \\"bug\\" in sidebar" plan_execute:true',
+      )
+
+      const payload = samplePayload({
+        conversation_id: convId,
+        transcript_path: join(appDataDir, 'brain', convId, '.system_generated', 'logs', 'transcript.jsonl'),
+      })
+      assert.equal(syncHerdrTitle(payload, { env, cacheDir, runHc }), true)
+      assert.deepEqual(calls.at(-1), ['label', 't18', 'agent.title=Fix "bug" in sidebar'])
+
+      assert.equal(
+        syncHerdrTitle({ ...payload, conversation_title: 'Explicit Title' }, { env, cacheDir, runHc }),
+        true,
+      )
+      assert.deepEqual(calls.at(-1), ['label', 't18', 'agent.title=Explicit Title'])
+    } finally {
+      rmSync(cacheDir, { recursive: true, force: true })
+      rmSync(appDataDir, { recursive: true, force: true })
+    }
+  })
+
+  it('supports camelCase hook payloads, falls back across candidate dirs, and runs --hook CLI mode', () => {
+    const cacheDir = mkdtempSync(join(tmpdir(), 'agy-hook-cache-'))
+    const homeDir = mkdtempSync(join(tmpdir(), 'agy-hook-home-'))
+    const emptyBrainDir = mkdtempSync(join(tmpdir(), 'agy-hook-empty-'))
+    const calls = []
+    const runHc = args => calls.push(args)
+    const convId = '13b7f061-8178-4e40-9a01-1c403487cb03'
+
+    try {
+      const cliAppData = join(homeDir, '.gemini', 'antigravity-cli')
+      mkdirSync(join(cliAppData, 'annotations'), { recursive: true })
+      writeFileSync(join(cliAppData, 'annotations', `${convId}.pbtxt`), 'title:"Hook Title"\n')
+
+      const hookPayload = {
+        conversationId: convId,
+        transcriptPath: join(emptyBrainDir, 'brain', convId, '.system_generated', 'logs', 'transcript.jsonl'),
+      }
+      assert.equal(
+        syncHerdrTitle(hookPayload, { env: { HC_TERMINAL_ID: 't18', HOME: homeDir }, cacheDir, runHc }),
+        true,
+      )
+      assert.deepEqual(calls.at(-1), ['label', 't18', 'agent.title=Hook Title'])
+
+      const script = fileURLToPath(new URL('../footer.mjs', import.meta.url))
+      const postOut = execFileSync('node', [script, '--hook'], {
+        input: JSON.stringify({ conversationId: convId, hookEventName: 'PostInvocation' }),
+        env: { ...process.env, HC_TERMINAL_ID: '' },
+        encoding: 'utf8',
+      })
+      assert.equal(postOut, '{}\n')
+
+      const stopOut = execFileSync('node', [script, '--hook'], {
+        input: JSON.stringify({ conversationId: convId, hookEventName: 'Stop' }),
+        env: { ...process.env, HC_TERMINAL_ID: '' },
+        encoding: 'utf8',
+      })
+      assert.equal(stopOut, '{"decision":"allow"}\n')
+    } finally {
+      rmSync(cacheDir, { recursive: true, force: true })
+      rmSync(homeDir, { recursive: true, force: true })
+      rmSync(emptyBrainDir, { recursive: true, force: true })
+    }
   })
 })
